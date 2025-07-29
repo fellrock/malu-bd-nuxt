@@ -10,8 +10,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 /////////////////  ENUM GOES HERE  //////////////////
@@ -27,7 +27,7 @@ model Guest {
   id            String   @id @default(cuid())
   name          String
   email         String   @unique
-  inviteCode    String   @default(uuid()) @db.Char(36)
+  inviteCode    String   @unique
   status        Status   @default(REGISTERED)
   dietary       String?
   giftChoice    String?    // e.g. book, toy, clothes
