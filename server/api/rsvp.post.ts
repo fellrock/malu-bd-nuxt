@@ -1,7 +1,5 @@
 import { z } from 'zod'
-import { PrismaClient } from '../../app/generated/prisma'
-
-const prisma = new PrismaClient()
+import { prisma } from '../utils/prisma'
 
 // Validation schema for RSVP submission
 const rsvpSchema = z.object({
