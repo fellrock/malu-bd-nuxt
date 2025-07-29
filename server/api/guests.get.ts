@@ -1,6 +1,4 @@
-import { PrismaClient } from '../../app/generated/prisma'
-
-const prisma = new PrismaClient()
+import { prisma } from '../utils/prisma'
 
 export default defineEventHandler(async (event) => {
   // Only allow GET requests
@@ -32,8 +30,8 @@ export default defineEventHandler(async (event) => {
 
     // Calculate summary stats
     const totalGuests = guests.length
-    const totalPeople = guests.reduce((sum, guest) => sum + guest.plusOnes + 1, 0)
-    const confirmedGuests = guests.filter(guest => guest.status === 'CONFIRMED').length
+    const totalPeople = guests.reduce((sum: number, guest: any) => sum + guest.plusOnes + 1, 0)
+    const confirmedGuests = guests.filter((guest: any) => guest.status === 'CONFIRMED').length
 
     return {
       success: true,
