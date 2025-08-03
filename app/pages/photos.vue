@@ -167,19 +167,14 @@ useHead({
 .photos-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667EEA, #764BA2, #F093FB, #F5576C);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  /* background-size and animation removed for performance */
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+/* @keyframes gradientShift removed for performance */
 
 /* Header */
 .header {
