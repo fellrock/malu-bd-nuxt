@@ -124,7 +124,7 @@
 
 .nav-button {
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg, #FFFFFFE6, #FFFFFFCC); /* #FFF + alpha */
+  background: linear-gradient(135deg, #FFFFFFE6, #FFFFFFCC);
   color: #4A5568;
   border: 2px solid #FFFFFF4D;
   padding: 1rem 2rem;
