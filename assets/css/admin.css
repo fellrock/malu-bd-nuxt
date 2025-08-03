@@ -5,7 +5,6 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #667EEA, #764BA2, #F093FB, #F5576C);
   background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
