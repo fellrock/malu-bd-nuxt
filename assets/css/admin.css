@@ -1,117 +1,21 @@
-<template>
-  <div class="admin-container">
-    <div class="header">
-      <h1 class="title">Admin - Lista de Convidados</h1>
-      <p class="subtitle">Maria Luiza 4 Anos</p>
-    </div>
+/* Styles for Admin Page */
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-number">{{ stats.totalGuests }}</div>
-        <div class="stat-label">Total de Convidados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">{{ stats.totalPeople }}</div>
-        <div class="stat-label">Total de Pessoas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">{{ stats.withDietary }}</div>
-        <div class="stat-label">Com Restrições</div>
-      </div>
-    </div>
-
-    <div class="table-container">
-      <div class="table-header">
-        <h2>Lista de Confirmações</h2>
-        <button @click="refreshData" class="refresh-btn" :disabled="loading">
-          {{ loading ? 'Atualizando...' : '🔄 Atualizar' }}
-        </button>
-      </div>
-      
-      <div v-if="loading" class="loading">
-        Carregando dados...
-      </div>
-
-      <div v-else-if="guests.length === 0" class="empty-state">
-        Nenhuma confirmação ainda.
-      </div>
-
-      <div v-else class="table-wrapper">
-        <table class="guests-table">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Código</th>
-              <th>Pessoas</th>
-              <th>Restrições</th>
-              <th>Data</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="guest in guests" :key="guest.id">
-              <td>{{ guest.name }}</td>
-              <td><span class="invite-code">{{ guest.inviteCode }}</span></td>
-              <td><span class="guest-count">{{ guest.guestCount }}</span></td>
-              <td>{{ guest.dietaryRestrictions || 'Nenhuma' }}</td>
-              <td>{{ new Date(guest.createdAt).toLocaleDateString('pt-BR') }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="nav-section">
-        <a href="/" class="nav-button">
-          🏠 Voltar ao Início
-        </a>
-      </div>
-    </div>
-  </div>  <!-- closes admin-container -->
-</template>
-
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-
-const guests = ref<any[]>([])
-const stats = ref({ totalGuests: 0, totalPeople: 0, withDietary: 0 })
-const loading = ref(false)
-
-async function fetchGuests() {
-  loading.value = true
-  try {
-    const res: any = await $fetch('/api/guests')
-    if (res.success) {
-      guests.value = res.guests
-      stats.value = res.stats
-    }
-  } catch (err) {
-    console.error('Error fetching guests:', err)
-  } finally {
-    loading.value = false
-  }
-}
-
-function refreshData() {
-  fetchGuests()
-}
-
-onMounted(() => {
-  fetchGuests()
-})
-
-useHead({
-  title: 'Admin - Maria Luiza 4 Anos'
-})
-</script>
-
-<style scoped>
 /* Main Container and Layout */
 .admin-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1E293B, #334155, #475569);
+  background: linear-gradient(135deg, #667EEA, #764BA2, #F093FB, #F5576C);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Header Styles */
@@ -125,8 +29,11 @@ useHead({
   font-size: 3rem;
   font-weight: 800;
   margin: 0 0 1rem 0;
-  color: #F8FAFC;
-  text-shadow: 0 4px 20px #00000040;
+  background: linear-gradient(135deg, #FFFFFF, #F0F8FF);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 20px #00000033;
   letter-spacing: -1px;
 }
 
@@ -135,8 +42,8 @@ useHead({
   margin: 0 0 2rem 0;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.2rem;
-  color: #CBD5E1;
-  text-shadow: 0 2px 10px #00000040;
+  color: #FFFFFFCC;
+  text-shadow: 0 2px 10px #00000033;
 }
 
 /* Stats Grid */
@@ -150,36 +57,35 @@ useHead({
 }
 
 .stat-card {
-  background: linear-gradient(145deg, #64748B20, #64748B15);
+  background: linear-gradient(145deg, #FFFFFF1A, #FFFFFF0D);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid #64748B30;
-  box-shadow: 0 25px 50px #00000020;
+  border: 1px solid #FFFFFF1A;
+  box-shadow: 0 25px 50px #0000001A;
   text-align: center;
   transition: all 0.3s ease;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 35px 70px #00000030;
-  background: linear-gradient(145deg, #64748B25, #64748B20);
+  box-shadow: 0 35px 70px #00000026;
 }
 
 .stat-number {
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: 3rem;
   font-weight: 800;
-  color: #F8FAFC;
+  color: #FFFFFF;
   margin-bottom: 0.5rem;
-  text-shadow: 0 2px 10px #00000040;
+  text-shadow: 0 2px 10px #00000033;
 }
 
 .stat-label {
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  color: #CBD5E1;
+  color: #FFFFFFCC;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -188,7 +94,7 @@ useHead({
 .loading {
   text-align: center;
   padding: 3rem;
-  color: #94A3B8;
+  color: #FFFFFFB3;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.1rem;
 }
@@ -216,12 +122,11 @@ useHead({
   text-shadow: 0 1px 5px #00000033;
 }
 
-/* Buttons */
 .nav-button {
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
-  color: #334155;
-  border: 2px solid #CBD5E150;
+  background: linear-gradient(135deg, #FFFFFFE6, #FFFFFFCC); /* #FFF + alpha */
+  color: #4A5568;
+  border: 2px solid #FFFFFF4D;
   padding: 1rem 2rem;
   border-radius: 50px;
   font-size: 1rem;
@@ -232,7 +137,9 @@ useHead({
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 15px 35px #00000020, 0 0 0 1px #CBD5E150;
+  box-shadow:
+    0 15px 35px #0000001A,
+    0 0 0 1px #FFFFFF4D;
   backdrop-filter: blur(10px);
   margin: 2rem auto 0;
   position: relative;
@@ -246,7 +153,7 @@ useHead({
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, #FFFFFF80, transparent);
+  background: linear-gradient(90deg, transparent, #FFFFFF66, transparent);
   transition: left 0.6s;
 }
 
@@ -256,21 +163,21 @@ useHead({
 
 .nav-button:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 25px 50px #00000025, 0 0 0 1px #CBD5E180;
-  background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+  box-shadow:
+    0 25px 50px #0000001A,
+    0 0 0 1px #FFFFFF66;
+  background: linear-gradient(135deg, #FFFFFF, #FFFFFFF2);
 }
 
 /* Table Styles */
 .table-container {
-  background: linear-gradient(145deg, #64748B20, #64748B15);
+  background: linear-gradient(145deg, #FFFFFF1A, #FFFFFF0D);
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 2rem;
-  border: 1px solid #64748B30;
-  box-shadow: 0 25px 50px #00000020;
+  border: 1px solid #FFFFFF1A;
+  box-shadow: 0 25px 50px #0000001A;
   margin-top: 2rem;
-  width: 100%;
-  max-width: 1200px;
 }
 
 .table-header {
@@ -285,15 +192,15 @@ useHead({
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0;
-  color: #F8FAFC;
-  text-shadow: 0 2px 10px #00000040;
+  color: #FFFFFF;
+  text-shadow: 0 2px 10px #00000033;
 }
 
 .refresh-btn {
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  background: linear-gradient(135deg, #81E6D933, #90CDF433);
   color: #FFFFFF;
-  border: 1px solid #60A5FA40;
+  border: 1px solid #FFFFFF33;
   padding: 0.75rem 1.5rem;
   border-radius: 12px;
   font-size: 0.9rem;
@@ -304,9 +211,8 @@ useHead({
 }
 
 .refresh-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563EB, #1E40AF);
+  background: linear-gradient(135deg, #81E6D94D, #90CDF44D);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px #3B82F640;
 }
 
 .refresh-btn:disabled {
@@ -317,7 +223,7 @@ useHead({
 .table-wrapper {
   overflow-x: auto;
   border-radius: 12px;
-  background: #64748B10;
+  background: #FFFFFF0D;
 }
 
 .guests-table {
@@ -327,12 +233,12 @@ useHead({
 }
 
 .guests-table th {
-  background: linear-gradient(135deg, #64748B30, #64748B25);
-  color: #F8FAFC;
+  background: linear-gradient(135deg, #FFFFFF26, #FFFFFF1A);
+  color: #FFFFFF;
   font-weight: 600;
   padding: 1rem;
   text-align: left;
-  border-bottom: 1px solid #64748B40;
+  border-bottom: 1px solid #FFFFFF1A;
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -340,46 +246,39 @@ useHead({
 
 .guests-table td {
   padding: 1rem;
-  border-bottom: 1px solid #64748B20;
-  color: #E2E8F0;
+  border-bottom: 1px solid #FFFFFF0D;
+  color: #FFFFFFE6;
   font-size: 0.95rem;
 }
 
 .guests-table tr:hover {
-  background: #64748B15;
+  background: #FFFFFF0D;
 }
 
 .empty-state {
   text-align: center;
   padding: 3rem;
-  color: #94A3B8;
+  color: #FFFFFFB3;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.1rem;
 }
 
 .invite-code {
   font-family: 'Courier New', monospace;
-  background: #10B981;
-  color: #FFFFFF;
+  background: #81E6D933;
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
   font-weight: bold;
-  font-size: 0.85rem;
+  border: 1px solid #FFFFFF1A;
 }
 
 .guest-count {
-  background: #8B5CF6;
-  color: #FFFFFF;
+  background: #A78BFA33;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.85rem;
-}
-
-/* Navigation */
-.nav-section {
-  margin-top: 3rem;
-  text-align: center;
+  border: 1px solid #FFFFFF1A;
 }
 
 /* Mobile Responsiveness */
@@ -428,4 +327,3 @@ useHead({
     font-size: 0.95rem;
   }
 }
-</style>
