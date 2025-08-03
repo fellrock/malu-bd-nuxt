@@ -86,6 +86,10 @@
             <span class="button-icon">🎁</span>
             Ideias de Presentes
           </button>
+          <button @click="goToPhotos" class="secondary-btn">
+            <span class="button-icon">📸</span>
+            Galeria de Fotos
+          </button>
         </div>
         
         <!-- Discrete admin link -->
@@ -126,6 +130,10 @@ const goToRsvp = () => {
 
 const goToGifts = () => {
   navigateTo('/gifts')
+}
+
+const goToPhotos = () => {
+  navigateTo('/photos')
 }
 
 // Update countdown
