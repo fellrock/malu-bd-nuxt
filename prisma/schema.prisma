@@ -19,20 +19,35 @@ enum Status {
   CONFIRMED
   ATTENDED
 }
+
+enum Category {
+  Amigos
+  Creche
+  Familia
+  Padrinhos
+}
 ////////////////////////////////////////////////////
 
 // Party guest model
 model Guest {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  inviteCode    String   @unique
-  status        Status   @default(REGISTERED)
+  id            String    @id @default(cuid())
+  name          String    @unique
+  email         String?   // Optional but unique when provided
+  inviteCode    String    // No longer unique - multiple guests per code
+  status        Status    @default(REGISTERED)
   dietary       String?
-  giftChoice    String?    // e.g. book, toy, clothes
-  plusOnes      Int       @default(0)
-  surveyRating  Int?
   notes         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  
+  // New fields
+  category      Category
+  kidAge        Int?
+  maleKid       Boolean?  @default(false)
+  referenceCode String
+  cancelledAt   DateTime?
+  surveyRatingId Int?      // FK to future Rating table
+  
+  @@index([inviteCode])
+  @@index([referenceCode])
 }

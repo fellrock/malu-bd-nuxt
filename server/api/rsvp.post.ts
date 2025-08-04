@@ -1,14 +1,16 @@
 import { z } from 'zod'
 import { prisma } from '../utils/prisma'
 
-// Validation schema for RSVP submission
+// Validation schema for RSVP submission (legacy support)
 const rsvpSchema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   email: z.string().email('E-mail inválido').optional().or(z.literal('')),
-  phone: z.string().optional(),
-  guests: z.number().min(1, 'Número de pessoas é obrigatório').max(10, 'Máximo 10 pessoas'),
+  category: z.enum(['Amigos', 'Creche', 'Familia', 'Padrinhos']).default('Amigos'),
+  referenceCode: z.string().min(1, 'Código de referência é obrigatório'),
   dietary: z.string().optional(),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  kidAge: z.number().optional(),
+  maleKid: z.boolean().optional()
 })
 
 export default defineEventHandler(async (event) => {
@@ -44,15 +46,18 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Create guest record
+    // Create guest record with new schema
     const guest = await prisma.guest.create({
       data: {
         name: validatedData.name,
-        email: validatedData.email || `guest-${inviteCode.toLowerCase()}@temp.com`,
+        email: validatedData.email || null,
         inviteCode,
-        plusOnes: validatedData.guests - 1, // Total guests minus the main guest
+        category: validatedData.category,
+        referenceCode: validatedData.referenceCode,
         dietary: validatedData.dietary || null,
         notes: validatedData.notes || null,
+        kidAge: validatedData.kidAge || null,
+        maleKid: validatedData.maleKid || false,
         status: 'CONFIRMED'
       }
     })
@@ -65,11 +70,11 @@ export default defineEventHandler(async (event) => {
         id: guest.id,
         inviteCode: guest.inviteCode,
         name: guest.name,
-        totalGuests: validatedData.guests
+        referenceCode: guest.referenceCode
       }
     }
 
-  } catch (error) {
+  } catch (error: any) {
     // Handle validation errors
     if (error instanceof z.ZodError) {
       throw createError({
@@ -83,7 +88,7 @@ export default defineEventHandler(async (event) => {
     if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       throw createError({
         statusCode: 409,
-        statusMessage: 'E-mail já cadastrado'
+        statusMessage: 'Nome já cadastrado'
       })
     }
 
