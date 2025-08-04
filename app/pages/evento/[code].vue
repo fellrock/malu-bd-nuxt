@@ -20,7 +20,10 @@
       <!-- Guest Information -->
       <div v-if="referenceInfo" class="guest-info-card">
         <div class="card-header">
-          <h2>👥 Convidados</h2>
+          <h2>
+            <UsersIcon class="icon-responsive inline mr-2" />
+            Convidados
+          </h2>
           <div class="reference-info">
             <strong>{{ referenceInfo.referenceCode }}</strong>
             <span v-if="hasConfirmedGuests" class="confirmed-badge">Confirmado</span>
@@ -40,8 +43,14 @@
               </div>
             </div>
             <div class="guest-actions">
-              <button @click="editGuest(guest)" class="edit-btn" title="Editar">✏️</button>
-              <button @click="cancelGuest(guest)" class="cancel-btn" title="Cancelar">❌</button>
+              <button @click="editGuest(guest)" class="edit-btn" title="Editar">
+                <PencilIcon class="icon-xs" />
+                <span class="btn-text-desktop">Editar</span>
+              </button>
+              <button @click="cancelGuest(guest)" class="cancel-btn" title="Cancelar">
+                <XMarkIcon class="icon-xs" />
+                <span class="btn-text-desktop">Cancelar</span>
+              </button>
             </div>
           </div>
         </div>
@@ -49,14 +58,19 @@
         <!-- Family Actions -->
         <div class="family-actions">
           <button @click="rejectFamily" class="reject-family-btn">
-            ❌ Cancelar Participação de Todos
+            <XMarkIcon class="icon-sm" /> 
+            <span class="btn-text">Cancelar Participação de Todos</span>
+            <span class="btn-text-mobile">Cancelar Todos</span>
           </button>
         </div>
       </div>
 
       <!-- Countdown Card -->
       <div class="countdown-card">
-        <h2 class="card-title">⏰ Contagem Regressiva</h2>
+        <h2 class="card-title">
+          <ClockIcon class="icon-responsive inline mr-2" />
+          Contagem Regressiva
+        </h2>
         <div class="countdown-display">
           <div class="countdown-time">{{ timeLeft }}</div>
         </div>
@@ -64,7 +78,10 @@
 
       <!-- Event Timeline -->
       <div class="timeline-card">
-        <h2 class="card-title">📅 Cronograma do Evento</h2>
+        <h2 class="card-title">
+          <CalendarDaysIcon class="icon-responsive inline mr-2" />
+          Cronograma do Evento
+        </h2>
         <div class="timeline">
           <div class="timeline-item">
             <div class="timeline-time">10h00</div>
@@ -113,7 +130,10 @@
 
       <!-- Photo Album -->
       <div class="photos-card">
-        <h2 class="card-title">📸 Album de Fotos</h2>
+        <h2 class="card-title">
+          <CameraIcon class="icon-responsive inline mr-2" />
+          Album de Fotos
+        </h2>
         <div class="photo-sharing">
           <p class="photo-description">
             Compartilhe suas fotos da festa conosco! Clique na imagem do QR Code abaixo para acessar o álbum compartilhado do Google Photos.
@@ -122,7 +142,7 @@
             <a href="https://photos.google.com/share/album-link" target="_blank" class="qr-link">
               <div class="qr-code-image">
                 <div class="qr-placeholder">
-                  📱<br>
+                  <QrCodeIcon class="icon-xl mx-auto mb-2" />
                   <strong>QR Code</strong><br>
                   <small>Clique para acessar<br>o álbum de fotos</small>
                 </div>
@@ -135,23 +155,31 @@
 
       <!-- Gift Suggestions -->
       <div class="gifts-card">
-        <h2 class="card-title">🎁 Ideias de Presentes</h2>
+        <h2 class="card-title">
+          <GiftIcon class="icon-responsive inline mr-2" />
+          Ideias de Presentes
+        </h2>
         <div class="gifts-info">
           <p>Sua presença já é o melhor presente! Mas se quiser dar algo especial para Maria Luiza, temos algumas sugestões.</p>
           <button @click="goToGifts" class="gifts-link">
-            🎁 Ver Sugestões de Presentes
+            <GiftIcon class="icon-sm" /> 
+            <span class="btn-text">Ver Sugestões de Presentes</span>
+            <span class="btn-text-mobile">Ver Presentes</span>
           </button>
         </div>
       </div>
 
       <!-- Location Card -->
       <div class="location-card">
-        <h2 class="card-title">📍 Local da Festa</h2>
+        <h2 class="card-title">
+          <MapPinIcon class="icon-responsive inline mr-2" />
+          Local da Festa
+        </h2>
         <div class="location-info">
           <div class="venue-details">
             <strong>Quintal Cores</strong><br>
-            Av. Genaro de Carvalho, 3555<br>
-            Recreio - Rio de Janeiro, RJ
+            <span class="address-line">Av. Genaro de Carvalho, 3555</span><br>
+            <span class="address-line">Recreio - Rio de Janeiro, RJ</span>
           </div>
           <a href="https://maps.google.com/?q=Quintal+Cores+Recreio+RJ" target="_blank" class="map-link">
             🗺️ Ver no Mapa
@@ -161,42 +189,48 @@
 
       <!-- Dress Code -->
       <div class="dress-card">
-        <h2 class="card-title">👕 Roupa & Diversão</h2>
+        <h2 class="card-title">
+          <SparklesIcon class="icon-responsive inline mr-2" />
+          Roupa & Diversão
+        </h2>
         <div class="dress-info">
           <div class="dress-item">
             <span class="dress-icon">🌈</span>
-            <span>Roupa colorida e confortável</span>
+            <span class="dress-text">Roupa colorida e confortável</span>
           </div>
           <div class="dress-item">
             <span class="dress-icon">👟</span>
-            <span>Sapatos fechados para brincar</span>
+            <span class="dress-text">Sapatos fechados para brincar</span>
           </div>
           <div class="dress-item">
             <span class="dress-icon">🏊‍♀️</span>
-            <span>Traga roupa de banho (tem piscina!)</span>
+            <span class="dress-text">Traga roupa de banho (tem piscina!)</span>
           </div>
           <div class="dress-item">
             <span class="dress-icon">🧴</span>
-            <span>Protetor solar e toalha</span>
+            <span class="dress-text">Protetor solar e toalha</span>
           </div>
         </div>
       </div>
 
       <!-- Parking Info -->
       <div class="parking-card">
-        <h2 class="card-title">🚗 Estacionamento</h2>
+        <h2 class="card-title">
+          <TruckIcon class="icon-responsive inline mr-2" />
+          Estacionamento
+        </h2>
         <div class="parking-info">
           <div class="parking-item">
             <span class="parking-icon">🆓</span>
-            <span><strong>Gratuito</strong> - Estacionamento no local</span>
+            <span class="parking-text"><strong>Gratuito</strong> - Estacionamento no local</span>
           </div>
           <div class="parking-item">
             <span class="parking-icon">🚪</span>
-            <span>Entrada pela <strong>Rua das Palmeiras</strong></span>
+            <span class="parking-text">Entrada pela <strong>Rua das Palmeiras</strong></span>
           </div>
           <div class="parking-item">
             <span class="parking-icon">🚗</span>
-            <span>Vagas limitadas - chegue cedo!</span>
+            <span class="parking-text">Vagas limitadas - chegue cedo!</span>
           </div>
         </div>
       </div>
@@ -311,6 +345,21 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import {
+  UsersIcon,
+  ClockIcon,
+  CalendarDaysIcon,
+  CameraIcon,
+  GiftIcon,
+  MapPinIcon,
+  TruckIcon,
+  PencilIcon,
+  XMarkIcon,
+  CheckIcon,
+  QrCodeIcon,
+  SparklesIcon,
+  ShieldCheckIcon
+} from '@heroicons/vue/24/solid'
 
 // Define page meta for middleware
 definePageMeta({
@@ -397,6 +446,14 @@ async function fetchEventData() {
     if (res.success) {
       referenceInfo.value = res.referenceInfo
       guests.value = res.guests
+      
+      // Store invitation code in session for gift page access
+      const invitationCookie = useCookie('invitationCode', {
+        default: () => '',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        sameSite: 'lax'
+      })
+      invitationCookie.value = inviteCode.value
     }
   } catch (err: any) {
     console.error('Error fetching event data:', err)
@@ -584,6 +641,50 @@ useHead({
 </script>
 
 <style scoped>
+/* Responsive Icon System */
+.icon-responsive {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.icon-sm {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.icon-xs {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-xl {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Responsive Text System */
+.btn-text {
+  display: inline;
+}
+
+.btn-text-mobile {
+  display: none;
+}
+
+.btn-text-desktop {
+  display: inline;
+}
+
+.address-line {
+  font-size: 0.9rem;
+  color: #CBD5E1;
+}
+
+.dress-text,
+.parking-text {
+  flex: 1;
+}
+
 /* Event Container */
 .event-container {
   min-height: 100vh;
@@ -779,26 +880,48 @@ useHead({
 
 .guest-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .edit-btn,
 .cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: none;
-  border: none;
-  font-size: 1.2rem;
+  border: 2px solid;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0.6875rem 1rem;
   border-radius: 8px;
   transition: all 0.3s ease;
+  white-space: nowrap;
+  min-height: 2.875rem;
+  min-width: 8rem;
+  box-sizing: border-box;
+}
+
+.edit-btn {
+  border-color: #3B82F6;
+  color: #3B82F6;
 }
 
 .edit-btn:hover {
   background: #3B82F6;
+  color: #FFFFFF;
+}
+
+.cancel-btn {
+  border-color: #EF4444;
+  color: #EF4444;
 }
 
 .cancel-btn:hover {
   background: #EF4444;
+  color: #FFFFFF;
 }
 
 /* Family Actions */
@@ -810,16 +933,22 @@ useHead({
 }
 
 .reject-family-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: linear-gradient(135deg, #EF4444, #DC2626);
   color: #FFFFFF;
   border: 1px solid #F8717140;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   border-radius: 12px;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  white-space: nowrap;
+  min-height: 2.75rem;
 }
 
 .reject-family-btn:hover {
@@ -837,12 +966,8 @@ useHead({
   font-family: 'Courier New', monospace;
   font-size: 2.5rem;
   font-weight: 800;
-  color: #F8FAFC;
+  color: #FFFFFF;
   text-shadow: 0 4px 20px #00000040;
-  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 /* Timeline */
@@ -985,6 +1110,10 @@ useHead({
 }
 
 .gifts-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: linear-gradient(135deg, #F59E0B, #D97706);
   color: #FFFFFF;
   border: none;
@@ -995,8 +1124,9 @@ useHead({
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: inline-block;
   text-decoration: none;
+  white-space: nowrap;
+  min-height: 2.75rem;
 }
 
 .gifts-link:hover {
@@ -1217,9 +1347,9 @@ useHead({
 }
 
 .cancel-btn {
-  background: linear-gradient(135deg, #64748B, #475569);
-  color: #FFFFFF;
-  border: 1px solid #64748B40;
+  background: none;
+  border: 2px solid #EF4444;
+  color: #EF4444;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -1229,7 +1359,8 @@ useHead({
 }
 
 .cancel-btn:hover {
-  background: linear-gradient(135deg, #475569, #334155);
+  background: #EF4444;
+  color: #FFFFFF;
 }
 
 .save-btn {
@@ -1361,6 +1492,247 @@ useHead({
   
   .timeline-time {
     min-width: auto;
+  }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .event-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  /* Responsive Icons */
+  .icon-responsive {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .icon-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .icon-xs {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .icon-xl {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  /* Responsive Text */
+  .btn-text {
+    display: none;
+  }
+  
+  .btn-text-mobile {
+    display: inline;
+  }
+  
+  .btn-text-desktop {
+    display: none;
+  }
+  
+  /* Card Layouts */
+  .guest-info-card,
+  .countdown-card,
+  .timeline-card,
+  .photos-card,
+  .gifts-card,
+  .location-card,
+  .dress-card,
+  .parking-card {
+    padding: 1.25rem;
+  }
+  
+  /* Mobile Guest Layout */
+  .guest-item {
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+  
+  .guest-info {
+    flex: 1;
+    margin-right: 1rem;
+  }
+  
+  .guest-name {
+    margin-bottom: 0.25rem;
+  }
+  
+  .guest-details {
+    flex-direction: column;
+    gap: 0.25rem;
+    align-items: flex-start;
+  }
+  
+  .guest-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-self: flex-start;
+    margin-top: 0.25rem;
+  }
+  
+  .edit-btn,
+  .cancel-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    min-height: 2rem;
+    min-width: 5rem;
+  }
+  
+  /* Timeline */
+  .timeline-item {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .timeline-time {
+    min-width: auto;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .timeline-content {
+    font-size: 0.9rem;
+  }
+  
+  /* Dress and Parking Items */
+  .dress-item,
+  .parking-item {
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .dress-icon,
+  .parking-icon {
+    font-size: 1rem;
+    min-width: 1.5rem;
+  }
+  
+  .dress-text,
+  .parking-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  /* Photo QR Section */
+  .qr-placeholder {
+    padding: 1rem;
+  }
+  
+  .qr-instruction {
+    font-size: 0.85rem;
+  }
+  
+  /* Address */
+  .address-line {
+    font-size: 0.85rem;
+  }
+  
+  /* Buttons */
+  .reject-family-btn,
+  .gifts-link {
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    min-height: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  /* Extra small icons */
+  .icon-responsive {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .icon-sm {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .icon-xs {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  
+  .icon-xl {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  /* Extra compact cards */
+  .guest-info-card,
+  .countdown-card,
+  .timeline-card,
+  .photos-card,
+  .gifts-card,
+  .location-card,
+  .dress-card,
+  .parking-card {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .card-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  /* Compact timeline */
+  .timeline-time {
+    font-size: 0.8rem;
+  }
+  
+  .timeline-content {
+    font-size: 0.85rem;
+  }
+  
+  /* Extra compact buttons */
+  .edit-btn,
+  .cancel-btn {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.625rem;
+    min-height: 1.75rem;
+  }
+  
+  .reject-family-btn,
+  .gifts-link {
+    font-size: 0.8rem;
+    padding: 0.625rem 0.875rem;
+    min-height: 2.25rem;
+  }
+  
+  /* Compact text */
+  .dress-text,
+  .parking-text {
+    font-size: 0.85rem;
+  }
+  
+  .dress-icon,
+  .parking-icon {
+    font-size: 0.9rem;
+    min-width: 1.25rem;
+  }
+  
+  .address-line {
+    font-size: 0.8rem;
   }
 }
 

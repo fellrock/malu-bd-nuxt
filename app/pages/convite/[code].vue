@@ -8,24 +8,30 @@
     <!-- Event Info Summary -->
     <div class="event-summary">
       <div class="event-item">
-        <div class="event-icon">📅</div>
+        <div class="event-icon">
+          <CalendarDaysIcon class="icon-responsive" />
+        </div>
         <div class="event-details">
           <strong>Data:</strong> 30 de Agosto de 2025<br>
           <strong>Horário:</strong> 10h às 14h
         </div>
       </div>
       <div class="event-item">
-        <div class="event-icon">📍</div>
+        <div class="event-icon">
+          <MapPinIcon class="icon-responsive" />
+        </div>
         <div class="event-details">
           <strong>Local:</strong> Quintal Cores<br>
-          Recreio - Rio de Janeiro, RJ
+          <span class="location-subtitle">Recreio - Rio de Janeiro, RJ</span>
         </div>
       </div>
       <div class="event-item">
-        <div class="event-icon">🚗</div>
+        <div class="event-icon">
+          <TruckIcon class="icon-responsive" />
+        </div>
         <div class="event-details">
           <strong>Estacionamento:</strong> Gratuito no local<br>
-          Entrada pela Rua das Palmeiras
+          <span class="location-subtitle">Entrada pela Rua das Palmeiras</span>
         </div>
       </div>
     </div>
@@ -60,12 +66,12 @@
               />
               <button 
                 type="button" 
-                @click="removeGuest(index)" 
-                class="remove-btn"
+                @click="removeGuest(index)"                 
+                class="remove-btn desktop-remove"
                 v-if="formGuests.length > 1"
                 title="Remover convidado"
               >
-                🗑️
+                <TrashIcon class="icon-sm" />
               </button>
             </div>
 
@@ -118,24 +124,64 @@
                 rows="2"
               ></textarea>
             </div>
+            
+            <!-- Mobile remove button at bottom -->
+            <div v-if="formGuests.length > 1" class="mobile-remove-container">
+              <button 
+                type="button" 
+                @click="removeGuest(index)" 
+                class="remove-btn mobile-remove"
+                title="Remover convidado"
+              >
+                <TrashIcon class="icon-xs" /> 
+                <span class="mobile-btn-text">Remover</span>
+              </button>
+            </div>
           </div>
         </div>
 
         <div class="form-actions">
           <button type="button" @click="addGuest" class="add-guest-btn">
-            ➕ Adicionar Convidado
+            <PlusIcon class="icon-sm" /> 
+            <span class="btn-text">Adicionar Convidado</span>
+            <span class="btn-text-mobile">Adicionar</span>
           </button>
         </div>
 
         <div class="form-buttons">
           <button type="button" @click="showRejectDialog = true" class="reject-btn">
-            ❌ Recusar Convite
+            <XMarkIcon class="icon-sm" /> 
+            <span class="btn-text">Recusar Convite</span>
+            <span class="btn-text-mobile">Recusar</span>
           </button>
           <button type="submit" :disabled="submitting" class="confirm-btn">
-            {{ submitting ? 'Confirmando...' : '✅ Confirmar Presença' }}
+            <CheckIcon class="icon-sm" /> 
+            <span class="btn-text">{{ submitting ? 'Confirmando...' : 'Confirmar Presença' }}</span>
+            <span class="btn-text-mobile">{{ submitting ? 'Confirmando...' : 'Confirmar' }}</span>
           </button>
         </div>
       </form>
+    </div>
+
+    <!-- Remove Guest Confirmation Dialog -->
+    <div v-if="showRemoveGuestDialog" class="modal-overlay" @click="closeRemoveGuestDialog">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Remover Convidado</h3>
+        </div>
+        <div class="modal-body">
+          <p>Tem certeza que deseja remover <strong>{{ formGuests[removingGuestIndex]?.name || 'este convidado' }}</strong> da lista?</p>
+          <p v-if="formGuests[removingGuestIndex]?.id"><strong>Esta ação não pode ser desfeita.</strong></p>
+        </div>
+        <div class="modal-actions">
+          <button @click="closeRemoveGuestDialog" class="cancel-btn">
+            Não, Manter
+          </button>
+          <button @click="confirmRemoveGuest" class="reject-confirm-btn">
+            Sim, Remover
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Reject Confirmation Dialog -->
@@ -191,6 +237,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import {
+  CalendarDaysIcon,
+  MapPinIcon,
+  TruckIcon,
+  TrashIcon,
+  PlusIcon,
+  CheckIcon,
+  XMarkIcon
+} from '@heroicons/vue/24/solid'
 
 // Define page meta for middleware
 definePageMeta({
@@ -239,6 +294,8 @@ const submitting = ref(false)
 const rejecting = ref(false)
 const showRejectDialog = ref(false)
 const showSuccessModal = ref(false)
+const showRemoveGuestDialog = ref(false)
+const removingGuestIndex = ref<number>(-1)
 
 const referenceInfo = ref<any>(null)
 const originalGuests = ref<any[]>([])
@@ -264,6 +321,14 @@ async function fetchGuestData() {
       referenceInfo.value = res.referenceInfo
       originalGuests.value = res.guests
       
+      // Store invitation code in session for gift page access
+      const invitationCookie = useCookie('invitationCode', {
+        default: () => '',
+        maxAge: 60 * 60 * 24 * 7, // 1 week
+        sameSite: 'lax'
+      })
+      invitationCookie.value = inviteCode.value
+            
       // Initialize form with existing guests or create empty one
       if (res.guests.length > 0) {
         formGuests.value = res.guests.map((guest: any) => ({
@@ -310,6 +375,14 @@ function addGuest() {
 
 function removeGuest(index: number) {
   if (formGuests.value.length > 1) {
+    removingGuestIndex.value = index
+    showRemoveGuestDialog.value = true
+  }
+}
+
+function confirmRemoveGuest() {
+  const index = removingGuestIndex.value
+  if (index >= 0 && formGuests.value.length > 1) {
     const guest = formGuests.value[index]
     if (guest.id) {
       // Mark existing guest for cancellation
@@ -317,6 +390,12 @@ function removeGuest(index: number) {
     }
     formGuests.value.splice(index, 1)
   }
+  closeRemoveGuestDialog()
+}
+
+function closeRemoveGuestDialog() {
+  showRemoveGuestDialog.value = false
+  removingGuestIndex.value = -1
 }
 
 function toggleKidFields(guest: any, event: Event) {
@@ -425,8 +504,61 @@ useHead({
 })
 </script>
 
+
 <style scoped>
-/* Similar to admin styles but adapted for invitation form */
+/* Modern Design System - Simplified */
+:root {
+  /* Essential Color Tokens */
+  --color-primary: #10B981;
+  --color-danger: #EF4444;
+  --color-purple: #8B5CF6;
+  
+  /* Essential Spacing */
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  
+  /* Essential Transitions */
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Responsive Icon System */
+.icon-responsive {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.icon-sm {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.icon-xs {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive Text System */
+.btn-text {
+  display: inline;
+}
+
+.btn-text-mobile {
+  display: none;
+}
+
+.mobile-btn-text {
+  display: inline;
+}
+
+.location-subtitle {
+  font-size: 0.9rem;
+  color: #CBD5E1;
+  font-weight: normal;
+}
+
+/* Modern Invitation Container with Enhanced Glassmorphism */
 .invitation-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
@@ -434,6 +566,28 @@ useHead({
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  
+  /* Background noise for glassmorphism */
+  &::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .header {
@@ -465,7 +619,7 @@ useHead({
   background: linear-gradient(145deg, #64748B20, #64748B15);
   backdrop-filter: blur(20px);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.5rem;
   border: 1px solid #64748B30;
   box-shadow: 0 25px 50px #00000020;
   margin-bottom: 2rem;
@@ -478,7 +632,7 @@ useHead({
   display: flex;
   align-items: flex-start;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .event-item:last-child {
@@ -488,12 +642,18 @@ useHead({
 .event-icon {
   font-size: 1.5rem;
   min-width: 2rem;
+  color: #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .event-details {
   color: #E2E8F0;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 /* Form Styles */
@@ -544,11 +704,55 @@ useHead({
   gap: 2rem;
 }
 
+.form-container input[type="email"],
+.form-container input[type="text"],
+.form-container input[type="number"],
+.form-container select,
+.form-container textarea {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: #1e293b;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-container input[type="email"]::placeholder,
+.form-container input[type="text"]::placeholder,
+.form-container input[type="number"]::placeholder,
+.form-container textarea::placeholder {
+  color: #64748b;
+}
+
+.form-container input[type="email"]:focus,
+.form-container input[type="text"]:focus,
+.form-container input[type="number"]:focus,
+.form-container select:focus,
+.form-container textarea:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px #3B82F620;
+  background: #ffffff;
+}
+
+.form-container select option {
+  background: #ffffff;
+  color: #1e293b;
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
 .guest-item {
-  background: #64748B10;
+  background: #ffffff15;
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #64748B20;
+  border: 1px solid #ffffff20;
+  backdrop-filter: blur(10px);
 }
 
 .guest-header {
@@ -560,35 +764,145 @@ useHead({
 
 .guest-name-input {
   flex: 1;
-  background: #64748B15;
-  border: 1px solid #64748B40;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.75rem;
-  color: #F8FAFC;
+  color: #1e293b;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.guest-name-input::placeholder {
+  color: #64748b;
 }
 
 .guest-name-input:focus {
   outline: none;
   border-color: #3B82F6;
   box-shadow: 0 0 0 3px #3B82F620;
+  background: #ffffff;
 }
 
 .remove-btn {
-  background: #EF4444;
-  border: none;
+  /* Reset and base styles */
+  background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
+  color: #FFFFFF;
+  border: 2px solid transparent;
   border-radius: 8px;
-  padding: 0.75rem;
+  padding: 0.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  
+  /* Layout and alignment */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  
+  /* Modern interactions */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  
+  /* Typography */
   font-size: 1rem;
+  font-weight: 500;
+  
+  /* Accessibility */
+  outline: none;
+  user-select: none;
 }
 
 .remove-btn:hover {
-  background: #DC2626;
-  transform: scale(1.1);
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.remove-btn:active {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  transform: translateY(0);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 1px 1px rgba(0, 0, 0, 0.06);
+}
+
+.remove-btn:focus-visible {
+  outline: 2px solid #EF4444;
+  outline-offset: 2px;
+}
+
+/* Desktop remove button (next to name input) */
+.desktop-remove {
+  display: block;
+}
+
+/* Mobile remove button (at bottom of guest item) */
+/* Mobile remove button (at bottom of guest item) */
+.mobile-remove {
+  /* Reset and base styles */
+  background: linear-gradient(135deg, #F87171 0%, #EF4444 100%);
+  color: #FFFFFF;
+  border: 2px solid transparent;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  cursor: pointer;
+  width: 100%;
+  
+  /* Layout and alignment */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  
+  /* Modern interactions */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  
+  /* Accessibility */
+  outline: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.mobile-remove:hover {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+.mobile-remove:active {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  transform: translateY(0);
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 1px 1px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-remove:focus-visible {
+  outline: 2px solid #EF4444;
+  outline-offset: 2px;
+}
+
+.mobile-remove-container {
+  display: none;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #64748B30;
 }
 
 .guest-fields {
@@ -643,12 +957,29 @@ useHead({
 
 .kid-input,
 .kid-select {
-  background: #64748B15;
-  border: 1px solid #64748B40;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.75rem;
-  color: #F8FAFC;
+  color: #1e293b;
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.kid-input::placeholder {
+  color: #64748b;
+}
+
+.kid-input:focus,
+.kid-select:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px #3B82F620;
+  background: #ffffff;
+}
+
+.kid-select option {
+  background: #ffffff;
+  color: #1e293b;
 }
 
 .form-actions {
@@ -656,22 +987,201 @@ useHead({
   text-align: center;
 }
 
+/* Button Icon Styling */
+button svg {
+  color: #FFFFFF !important;
+}
+
+.event-icon svg {
+  color: #E2E8F0 !important;
+}
+
+/* Simplified Button Styles */
 .add-guest-btn {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  border: 1px solid #34D39940;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   font-weight: 600;
+  font-size: 0.95rem;
+  color: #FFFFFF;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: 12px;
+  min-height: 2.75rem;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: linear-gradient(135deg, var(--color-purple) 0%, #7C3AED 100%);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
+  white-space: nowrap;
 }
 
 .add-guest-btn:hover {
-  background: linear-gradient(135deg, #059669, #047857);
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px #10B98140;
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+.reject-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #FFFFFF;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: 12px;
+  min-height: 2.75rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: linear-gradient(135deg, var(--color-danger) 0%, #DC2626 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.reject-btn:hover {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+.confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #FFFFFF;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: 12px;
+  min-height: 2.75rem;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.confirm-btn:disabled {
+  background: linear-gradient(135deg, #64748B 0%, #475569 100%);
+  color: #9CA3AF;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
+}
+
+.remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, var(--color-danger) 0%, #DC2626 100%);
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.remove-btn:hover {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  transform: translateY(-1px);
+}
+
+.desktop-remove {
+  display: block;
+}
+
+.mobile-remove {
+  display: none;
+  width: 100%;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  gap: var(--spacing-md);
+  min-height: 2.75rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.mobile-remove-container {
+  display: none;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #64748B30;
+}
+
+/* Modal Button Styles */
+.cancel-btn,
+.reject-confirm-btn,
+.event-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: 10px;
+  min-height: 2.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.cancel-btn {
+  background: rgba(100, 116, 139, 0.3);
+  color: #F8FAFC;
+}
+
+.cancel-btn:hover {
+  background: rgba(100, 116, 139, 0.5);
+  transform: translateY(-1px);
+}
+
+.reject-confirm-btn {
+  background: linear-gradient(135deg, var(--color-danger) 0%, #DC2626 100%);
+  color: #FFFFFF;
+}
+
+.reject-confirm-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+  transform: translateY(-1px);
+}
+
+.reject-confirm-btn:disabled {
+  background: #64748B;
+  color: #9CA3AF;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.event-btn {
+  background: linear-gradient(135deg, var(--color-purple) 0%, #7C3AED 100%);
+  color: #FFFFFF;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  min-height: 2.75rem;
+}
+
+.event-btn:hover {
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  transform: translateY(-1px);
 }
 
 .form-buttons {
@@ -679,47 +1189,6 @@ useHead({
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.reject-btn {
-  background: linear-gradient(135deg, #EF4444, #DC2626);
-  color: #FFFFFF;
-  border: 1px solid #F8717140;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.reject-btn:hover {
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #EF444440;
-}
-
-.confirm-btn {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  border: 1px solid #34D39940;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.confirm-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669, #047857);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #10B98140;
-}
-
-.confirm-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* Modal Styles */
@@ -781,62 +1250,7 @@ useHead({
   flex-wrap: wrap;
 }
 
-.cancel-btn {
-  background: linear-gradient(135deg, #64748B, #475569);
-  color: #FFFFFF;
-  border: 1px solid #64748B40;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancel-btn:hover {
-  background: linear-gradient(135deg, #475569, #334155);
-}
-
-.reject-confirm-btn {
-  background: linear-gradient(135deg, #EF4444, #DC2626);
-  color: #FFFFFF;
-  border: 1px solid #F8717140;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.reject-confirm-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
-}
-
-.reject-confirm-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.event-btn {
-  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
-  color: #FFFFFF;
-  border: 1px solid #A78BFA40;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.event-btn:hover {
-  background: linear-gradient(135deg, #7C3AED, #6D28D9);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #8B5CF640;
-}
-
-/* Loading and Error States */
+/* Mobile Responsiveness */
 .loading,
 .error {
   text-align: center;
@@ -872,13 +1286,58 @@ useHead({
   .event-summary,
   .form-container {
     max-width: 100%;
-    padding: 1.5rem;
+    padding: 1.25rem;
     margin-left: 0;
     margin-right: 0;
   }
   
+  /* Responsive Icons */
+  .icon-responsive {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .icon-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .icon-xs {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  /* Responsive Text */
+  .btn-text {
+    display: none;
+  }
+  
+  .btn-text-mobile {
+    display: inline;
+  }
+  
+  /* Event Details */
+  .event-details {
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  
+  .location-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  /* Compact Form Buttons */
   .form-buttons {
     flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .add-guest-btn,
+  .reject-btn,
+  .confirm-btn {
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    min-height: 2.5rem;
   }
   
   .kid-fields {
@@ -888,6 +1347,36 @@ useHead({
   .guest-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  /* Mobile remove button layout */
+  .desktop-remove {
+    display: none;
+  }
+
+  .mobile-remove-container {
+    display: block;
+  }
+
+  .mobile-remove {
+    display: flex;
+  }
+
+  /* Ensure name input takes full width on mobile */
+  .guest-name-input {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  /* Compact guest items */
+  .guest-item {
+    padding: 1.25rem;
+  }
+  
+  .mobile-remove-container {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
   }
 }
 
@@ -902,6 +1391,56 @@ useHead({
     padding: 1rem;
     margin-left: 0;
     margin-right: 0;
+  }
+  
+  /* Extra small icons */
+  .icon-responsive {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .icon-sm {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  
+  .icon-xs {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+  
+  /* Extra compact buttons */
+  .add-guest-btn,
+  .reject-btn,
+  .confirm-btn {
+    font-size: 0.8rem;
+    padding: 0.625rem 0.875rem;
+    min-height: 2.25rem;
+  }
+  
+  /* Event items */
+  .event-item {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .event-details {
+    font-size: 0.85rem;
+  }
+  
+  .location-subtitle {
+    font-size: 0.75rem;
+  }
+  
+  /* Compact guest items */
+  .guest-item {
+    padding: 1rem;
+  }
+  
+  .mobile-remove {
+    font-size: 0.8rem;
+    padding: 0.625rem 1rem;
+    min-height: 2.25rem;
   }
   
   .modal-content {

@@ -70,9 +70,9 @@
 
       <!-- Navigation -->
       <div class="navigation">
-        <button @click="goHome" class="nav-button">
-          <span class="button-icon">🏠</span>
-          Voltar ao Início
+        <button @click="goToEvent" class="nav-button">
+          <span class="button-icon">�</span>
+          Voltar ao Evento
         </button>
       </div>
       
@@ -85,35 +85,55 @@
 </template>
 
 <script setup lang="ts">
-// Define page meta for access control
-definePageMeta({
-  middleware: async (to) => {
-    // Check if user has a confirmed invitation code in query params or cookies
-    const route = useRoute()
-    const inviteCode = route.query.code as string || useCookie('confirmedCode').value
-    
-    if (inviteCode) {
-      try {
-        const res: any = await $fetch(`/api/guest-code/${inviteCode}`)
-        if (res.success && res.guests.length > 0) {
-          const hasConfirmedGuests = res.guests.some((guest: any) => guest.status === 'CONFIRMED')
-          
-          if (hasConfirmedGuests) {
-            // User has confirmed access, allow access to gifts page
-            return
-          }
-        }
-      } catch (err: any) {
-        console.error('Error checking access:', err)
-      }
+// Check for stored invitation code from previous successful page access
+onMounted(async () => {
+  const invitationCookie = useCookie('invitationCode', {
+    default: () => '',
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+    sameSite: 'lax'
+  })
+  
+  if (!invitationCookie.value) {
+    // No stored invitation code, redirect to access denied
+    await navigateTo('/acesso-negado', { replace: true })
+    return
+  }
+  
+  try {
+    // Verify the stored invitation code is still valid and has confirmed guests
+    const res: any = await $fetch(`/api/guest-code/${invitationCookie.value}`)
+    if (!res.success || !res.guests.length) {
+      await navigateTo('/acesso-negado', { replace: true })
+      return
     }
     
-    // If no confirmed access, redirect to access denied page
-    return navigateTo('/acesso-negado', { replace: true })
+    const hasConfirmedGuests = res.guests.some((guest: any) => guest.status === 'CONFIRMED')
+    if (!hasConfirmedGuests) {
+      await navigateTo('/acesso-negado', { replace: true })
+      return
+    }
+  } catch (err) {
+    console.error('Error verifying invitation code:', err)
+    await navigateTo('/acesso-negado', { replace: true })
+    return
   }
 })
 
 // Navigation functions
+const goToEvent = () => {
+  const invitationCookie = useCookie('invitationCode', {
+    default: () => '',
+    maxAge: 60 * 60 * 24 * 7, // 1 week
+    sameSite: 'lax'
+  })
+  
+  if (invitationCookie.value) {
+    navigateTo(`/evento/${invitationCookie.value}`)
+  } else {
+    navigateTo('/')
+  }
+}
+
 const goHome = () => {
   navigateTo('/')
 }
