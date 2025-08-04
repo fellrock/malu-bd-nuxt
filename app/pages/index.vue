@@ -1,518 +1,375 @@
+
 <template>
-  <div class="container">
-    <div class="content">
-      <!-- Header -->
-      <div class="header">
-        <h1 class="title">
-          Maria Luiza faz 4 aninhos!
-        </h1>
-        <div class="emoji-decoration">🎉 🎂 ✨</div>
-        <p class="date">
-          30 de Agosto de 2025 • 10h às 14h
-        </p>
-      </div>
-
-      <!-- Countdown -->
-      <div class="countdown-card">
-        <h2 class="countdown-title">
-          ⏰ Contagem Regressiva
-        </h2>
-        <div class="countdown-display">
-          <div class="countdown-time">
-            {{ timeLeft }}
-          </div>
+  <div class="landing-container">
+    <div class="landing-content">
+      <!-- Hero Section -->
+      <div class="hero-section">
+        <div class="hero-header">
+          <IdentificationIcon class="hero-icon" style="width: 3rem; height: 3rem;" />
+          <h1 class="hero-title">Sistema de Gestão de Eventos</h1>
+          <p class="hero-subtitle">
+            Uma solução completa para gerenciar convites, confirmações e celebrações especiais
+          </p>
         </div>
-      </div>
-
-      <!-- Party Details -->
-      <div class="party-details">
-        <h3 class="details-title">📍 Informações da Festa</h3>
-        
-        <div class="details-grid">
-          <div class="detail-card location-card">
-            <div class="detail-header">
-              <span class="detail-icon">🏠</span>
-              <strong>Local da Festa</strong>
-            </div>
-            <div class="detail-content">
-              <div class="venue-name">Quintal Cores</div>
-              <div class="address">
-                Av. Genaro de Carvalho, 3555<br>
-                Recreio - Rio de Janeiro, RJ
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-card dress-card">
-            <div class="detail-header">
-              <span class="detail-icon">👕</span>
-              <strong>Roupa & Diversão</strong>
-            </div>
-            <div class="detail-content">
-              <div class="dress-info">Roupa casual e confortável</div>
-              <div class="activity-info">
-                🏖️ Haverá brincadeiras com <strong>água e areia</strong><br>
-                💡 Traga roupas extras para as crianças!
-              </div>
-            </div>
-          </div>
-
-          <div class="detail-card parking-card">
-            <div class="detail-header">
-              <span class="detail-icon">🚗</span>
-              <strong>Estacionamento</strong>
-            </div>
-            <div class="detail-content">
-              <div class="parking-info">
-                ✅ Muitas vagas disponíveis na rua<br>
-                🎯 Estacionamento fácil e gratuito
-              </div>
+        <div class="hero-demo ui-card">
+          <div class="demo-card">
+            <HeartIcon class="demo-icon" style="width: 2rem; height: 2rem;" />
+            <h3>Inspirado pelo Amor</h3>
+            <p>Este projeto nasceu da necessidade de organizar a festa de 4 anos da minha filha, Maria Luiza</p>
+            <div class="demo-info">
+              <p>Uma solução desenvolvida com carinho para momentos especiais</p>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- CTA Button -->
-      <div class="cta-section">
-        <button @click="goToRsvp" class="cta-button">
-          <span class="button-icon">✨</span>
-          Confirmar Presença
-          <span class="button-icon">✨</span>
-        </button>
-        
-        <!-- Secondary Actions -->
-        <div class="secondary-actions">
-          <button @click="goToGifts" class="secondary-btn">
-            <span class="button-icon">🎁</span>
-            Ideias de Presentes
-          </button>
-          <button @click="goToPhotos" class="secondary-btn">
-            <span class="button-icon">📸</span>
-            Galeria de Fotos
-          </button>
+      <!-- Features Section -->
+      <div class="features-section">
+        <h2 class="features-title">Funcionalidades Principais</h2>
+        <div class="features-grid">
+          <div class="feature-card ui-card">
+            <QrCodeIcon class="feature-icon" style="width: 2rem; height: 2rem;" />
+            <h3>Códigos de Convite</h3>
+            <p>Sistema único de códigos de 6 dígitos para controle de acesso e confirmações personalizadas</p>
+          </div>
+          <div class="feature-card ui-card">
+            <ClipboardDocumentCheckIcon class="feature-icon" style="width: 2rem; height: 2rem;" />
+            <h3>RSVP Inteligente</h3>
+            <p>Formulários de confirmação com validação, informações sobre crianças e restrições alimentares</p>
+          </div>
+          <div class="feature-card ui-card">
+            <ChartBarIcon class="feature-icon" style="width: 2rem; height: 2rem;" />
+            <h3>Dashboard Admin</h3>
+            <p>Visão completa das confirmações, estatísticas em tempo real e gestão de convidados</p>
+          </div>
+          <div class="feature-card ui-card">
+            <PhotoIcon class="feature-icon" style="width: 2rem; height: 2rem;" />
+            <h3>Compartilhamento</h3>
+            <p>Sistema de álbum de fotos protegido por código de convite e informações do evento</p>
+          </div>
         </div>
-        
-        <!-- Discrete admin link -->
-        <div class="admin-link">
-          <a href="/admin" class="admin-text">Admin</a>
+      </div>
+      <!-- Tech Stack Section -->
+      <div class="tech-section">
+        <h2 class="tech-title">Tecnologias Utilizadas</h2>
+        <div class="tech-grid">
+          <div class="tech-item">
+            <CodeBracketIcon style="width: 1.5rem; height: 1.5rem;" />
+            <span>Nuxt 3.0</span>
+          </div>
+          <div class="tech-item">
+            <CircleStackIcon style="width: 1.5rem; height: 1.5rem;" />
+            <span>PostgreSQL</span>
+          </div>
+          <div class="tech-item">
+            <CubeIcon style="width: 1.5rem; height: 1.5rem;" />
+            <span>Prisma ORM</span>
+          </div>
+          <div class="tech-item">
+            <PaintBrushIcon style="width: 1.5rem; height: 1.5rem;" />
+            <span>Nuxt UI</span>
+          </div>
+        </div>
+      </div>
+      <!-- Project & Company Links -->
+      <div class="project-section">
+        <h2 class="project-title">Sobre o Projeto</h2>
+        <div class="project-links">
+          <a href="https://github.com/fellrock/malu-bd-nuxt" target="_blank" class="project-link">
+            <CodeBracketSquareIcon style="margin-right: 0.5rem; width: 1.2rem; height: 1.2rem;" />
+            <span>Código Fonte no GitHub</span>
+            <ArrowTopRightOnSquareIcon style="margin-left: 0.5rem; width: 0.8rem; height: 0.8rem;" />
+          </a>
+          <a href="https://kravela.cloud" target="_blank" class="project-link">
+            <GlobeAltIcon style="margin-right: 0.5rem; width: 1.2rem; height: 1.2rem;" />
+            <span>Kravela Cloud</span>
+            <ArrowTopRightOnSquareIcon style="margin-left: 0.5rem; width: 0.8rem; height: 0.8rem;" />
+          </a>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
-
-// Simple countdown logic
-const timeLeft = ref('')
-
-const updateCountdown = () => {
-  const eventDate = new Date('2025-08-30T10:00:00-03:00')
-  const now = new Date()
-  const diff = eventDate.getTime() - now.getTime()
-  
-  if (diff > 0) {
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    
-    timeLeft.value = `${days} dias, ${hours} horas, ${minutes} minutos`
-  } else {
-    timeLeft.value = "🎉 É hoje! 🎉"
-  }
-}
-
-// Navigation function
-const goToRsvp = () => {
-  navigateTo('/rsvp')
-}
-
-const goToGifts = () => {
-  navigateTo('/gifts')
-}
-
-const goToPhotos = () => {
-  navigateTo('/photos')
-}
-
-// Update countdown
-onMounted(() => {
-  updateCountdown()
-  setInterval(updateCountdown, 60000) // Update every minute
-})
-
-// Page meta
-useHead({
-  title: 'Maria Luiza - 4 Anos',
-  meta: [
-    { name: 'description', content: 'Venha comemorar os 4 aninhos da Maria Luiza!' }
-  ]
-})
+<script setup lang="ts">
+import {
+  IdentificationIcon,
+  HeartIcon,
+  QrCodeIcon,
+  ClipboardDocumentCheckIcon,
+  ChartBarIcon,
+  PhotoIcon,
+  CodeBracketIcon,
+  CircleStackIcon,
+  CubeIcon,
+  PaintBrushIcon,
+  ArrowTopRightOnSquareIcon,
+  GlobeAltIcon,
+  CodeBracketSquareIcon
+} from '@heroicons/vue/24/solid';
 </script>
 
 <style scoped>
-.container {
+.landing-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
 }
 
-.content {
-  max-width: 600px;
-  width: 100%;
+.landing-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hero-section {
   text-align: center;
-  color: white;
+  margin-bottom: 4rem;
 }
 
-.header {
-  margin-bottom: 3rem;
-}
-
-.title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  color: white;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  line-height: 1.1;
-}
-
-.emoji-decoration {
-  font-size: 2rem;
-  margin: 1rem 0;
-  animation: bounce 2s infinite;
-  display: block;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
-}
-
-.date {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 400;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  opacity: 0.95;
-}
-
-.countdown-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-  padding: 2.5rem;
-  margin-bottom: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.countdown-title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: white;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.countdown-display {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.15));
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.countdown-time {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.party-details {
-  margin-bottom: 3rem;
-}
-
-.details-title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: white;
+.hero-header {
   margin-bottom: 2rem;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-icon {
+  color: #ffffff;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: #e0e7ff;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.hero-demo {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.demo-card {
   text-align: center;
 }
 
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+.demo-icon {
+  color: #fbbf24;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-.detail-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(20px);
-  border-radius: 16px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.detail-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-}
-
-.detail-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: white;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-}
-
-.detail-icon {
+.demo-card h3 {
+  color: #ffffff;
   font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  margin-bottom: 1rem;
+  font-weight: 600;
 }
 
-.detail-content {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  color: white;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-}
-
-.venue-name {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #fff3cd;
-  margin-bottom: 0.5rem;
-}
-
-.address {
-  font-size: 1.1rem;
-  line-height: 1.4;
-  opacity: 0.9;
-}
-
-.dress-info {
-  font-size: 1.1rem;
-  font-weight: 500;
+.demo-card p {
+  color: #e0e7ff;
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
 
-.activity-info {
-  font-size: 1rem;
-  line-height: 1.6;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-  padding: 1rem;
-  border-radius: 8px;
-  border-left: 3px solid #feca57;
+.demo-info p {
+  color: #c7d2fe;
+  font-style: italic;
 }
 
-.parking-info {
-  font-size: 1.1rem;
-  line-height: 1.6;
+.features-section {
+  margin-bottom: 4rem;
 }
 
-.cta-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
+.features-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.cta-button {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
-  color: #667eea;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 1.2rem 3rem;
-  border-radius: 50px;
-  font-size: 1.3rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  box-shadow: 
-    0 15px 35px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
-.cta-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  transition: left 0.6s;
-}
-
-.cta-button:hover::before {
-  left: 100%;
-}
-
-.cta-button:hover {
-  transform: translateY(-5px) scale(1.05);
-  box-shadow: 
-    0 25px 50px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.4);
-  background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.95));
-}
-
-.secondary-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.secondary-btn {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+.feature-card {
   background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 0.875rem 2rem;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 1rem;
+  padding: 2rem;
+  text-align: center;
   transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+  color: #fbbf24;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.feature-card h3 {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.feature-card p {
+  color: #e0e7ff;
+  line-height: 1.6;
+}
+
+.tech-section {
+  margin-bottom: 4rem;
+}
+
+.tech-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tech-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-}
-
-.secondary-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-3px);
-}
-
-.button-icon {
-  font-size: 1.1em;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
-}
-
-.admin-link {
-  margin-top: 2rem;
-}
-
-.admin-text {
-  color: rgba(255, 255, 255, 0.4);
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 0.8rem;
-  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  color: #ffffff;
+  font-weight: 500;
   transition: all 0.3s ease;
-  opacity: 0.5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
-.admin-text:hover {
-  opacity: 1;
-  color: rgba(255, 255, 255, 0.8);
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+.tech-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* Mobile Responsiveness */
+.project-section {
+  margin-bottom: 4rem;
+}
+
+.project-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.project-links {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.project-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.project-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
-  .container {
-    padding: 1rem;
+  .landing-container {
+    padding: 1rem 0.5rem;
   }
-  
-  .title {
-    font-size: 2.5rem;
+
+  .hero-title {
+    font-size: 2rem;
   }
-  
-  .emoji-decoration {
-    font-size: 1.5rem;
+
+  .features-title,
+  .tech-title,
+  .project-title {
+    font-size: 2rem;
   }
-  
-  .date {
-    font-size: 1.2rem;
+
+  .project-links {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .countdown-card {
-    padding: 2rem;
-  }
-  
-  .countdown-title {
-    font-size: 1.5rem;
-  }
-  
-  .countdown-time {
-    font-size: 1.4rem;
-  }
-  
-  .details-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .detail-card {
+
+  .hero-demo,
+  .feature-card {
     padding: 1.5rem;
-  }
-  
-  .detail-header {
-    font-size: 1.1rem;
-  }
-  
-  .venue-name {
-    font-size: 1.2rem;
-  }
-  
-  .cta-button {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-  }
-  
-  .secondary-btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .title {
-    font-size: 2rem;
+  .hero-title {
+    font-size: 1.75rem;
   }
-  
-  .date {
-    font-size: 1rem;
+
+  .features-title,
+  .tech-title,
+  .project-title {
+    font-size: 1.75rem;
   }
-  
-  .countdown-card {
-    padding: 1.5rem;
-  }
-  
-  .countdown-time {
-    font-size: 1.2rem;
-  }
-  
-  .cta-button {
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
+
+  .features-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
