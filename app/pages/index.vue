@@ -54,7 +54,7 @@
         <div class="tech-grid">
           <div class="tech-item">
             <CodeBracketIcon style="width: 1.5rem; height: 1.5rem;" />
-            <span>Nuxt 3.0</span>
+            <span>Nuxt 4.0</span>
           </div>
           <div class="tech-item">
             <CircleStackIcon style="width: 1.5rem; height: 1.5rem;" />
