@@ -1,0 +1,1122 @@
+<template>
+  <div class="admin-container">
+    <div class="header">
+                       <div class="guest-details">
+                    <div v-for="guest in group.guests" :key="guest.id" class="guest-detail-item">
+                      <div class="guest-info">
+                        <span class="guest-name">{{ guest.name }}</span>
+                        <span v-if="guest.email" class="guest-email">{{ guest.email }}</span>
+                        <span v-if="guest.kidAge" class="kid-info">Criança: {{ guest.kidAge }} anos ({{ guest.maleKid ? 'Menino' : 'Menina' }})</span>
+                        <span v-if="guest.dietary" class="dietary">Restrições: {{ guest.dietary }}</span>
+                        <span class="status-badge" :class="guest.status.toLowerCase()">{{ guest.status }}</span>
+                      </div>
+                      <button @click="editGuest(guest)" class="edit-guest-btn">
+                        ✏️ Editar
+                      </button>
+                    </div>
+                  </div>s="title">Admin - Lista de Convidados</h1>
+      <p class="subtitle">Maria Luiza 4 Anos</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ stats.totalGroups }}</div>
+        <div class="stat-label">Total de Grupos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ stats.totalGuests }}</div>
+        <div class="stat-label">Total de Convidados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ stats.confirmedGuests }}</div>
+        <div class="stat-label">Confirmados</div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button @click="showAddGuestModal = true" class="action-btn add-btn">
+        ➕ Adicionar Convidado
+      </button>
+      <button @click="showImportModal = true" class="action-btn import-btn">
+        📋 Importar Planilha
+      </button>
+      <button @click="exportData" class="action-btn export-btn" :disabled="loading">
+        📊 Exportar Dados
+      </button>
+    </div>
+
+    <div class="table-container">
+      <div class="table-header">
+        <h2>Lista de Confirmações</h2>
+        <button @click="refreshData" class="refresh-btn" :disabled="loading">
+          {{ loading ? 'Atualizando...' : '🔄 Atualizar' }}
+        </button>
+      </div>
+      
+      <div v-if="loading" class="loading">
+        Carregando dados...
+      </div>
+
+      <div v-else-if="groupedGuests.length === 0" class="empty-state">
+        Nenhuma confirmação ainda.
+      </div>
+
+      <div v-else class="table-wrapper">
+        <table class="guests-table">
+          <thead>
+            <tr>
+              <th>Referência</th>
+              <th>Categoria</th>
+              <th>Código</th>
+              <th>Convidados</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="group in groupedGuests" :key="group.referenceCode">
+              <tr @click="toggleGroupDetails(group.referenceCode)" class="group-row">
+                <td><strong>{{ group.referenceCode }}</strong></td>
+                <td><span class="category-badge" :class="group.category">{{ group.category }}</span></td>
+                <td><span class="invite-code">{{ group.inviteCode }}</span></td>
+                <td><span class="guest-count">{{ group.guests.length }}</span></td>
+                <td>{{ new Date(group.guests[0]?.createdAt).toLocaleDateString('pt-BR') }}</td>
+              </tr>
+              <!-- Guest details row -->
+              <tr v-if="expandedGroups.includes(group.referenceCode)" class="details-row">
+                <td colspan="5">
+                  <div class="guest-details">
+                    <div v-for="guest in group.guests" :key="guest.id" class="guest-detail-item">
+                      <div class="guest-info">
+                        <span class="guest-name">{{ guest.name }}</span>
+                        <span v-if="guest.email" class="guest-email">{{ guest.email }}</span>
+                        <span v-if="guest.kidAge" class="kid-info">Criança: {{ guest.kidAge }} anos ({{ guest.maleKid ? 'Menino' : 'Menina' }})</span>
+                        <span v-if="guest.dietary" class="dietary">Restrições: {{ guest.dietary }}</span>
+                        <span class="status-badge" :class="guest.status.toLowerCase()">{{ guest.status }}</span>
+                      </div>
+                      <button @click="editGuest(guest)" class="edit-guest-btn">
+                        ✏️ Editar
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="nav-section">
+        <a href="/" class="nav-button">
+          🏠 Voltar ao Início
+        </a>
+      </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div v-if="showImportModal" class="modal-overlay" @click="showImportModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Importar Convidados</h3>
+          <button @click="showImportModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Selecione um arquivo Excel (.xlsx) ou CSV (.csv) com as colunas:</p>
+          <ul>
+            <li><strong>name</strong> - Nome do convidado</li>
+            <li><strong>category</strong> - Categoria (Amigos, Creche, Familia, Padrinhos)</li>
+            <li><strong>referenceCode</strong> - Código de referência (nome da família)</li>
+          </ul>
+          <input type="file" @change="handleFileSelect" accept=".xlsx,.csv" ref="fileInput" />
+        </div>
+        <div class="modal-actions">
+          <button @click="showImportModal = false" class="cancel-btn">Cancelar</button>
+          <button @click="importData" :disabled="!selectedFile || importing" class="import-btn">
+            {{ importing ? 'Importando...' : 'Importar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Guest Modal -->
+    <div v-if="showAddGuestModal" class="modal-overlay" @click="showAddGuestModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Adicionar Convidado</h3>
+          <button @click="showAddGuestModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="addName">Nome *</label>
+            <input v-model="newGuest.name" id="addName" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="addEmail">Email</label>
+            <input v-model="newGuest.email" id="addEmail" type="email" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label for="addCategory">Categoria *</label>
+            <select v-model="newGuest.category" id="addCategory" class="form-select" required>
+              <option value="Familia">Família</option>
+              <option value="Amigos">Amigos</option>
+              <option value="Creche">Creche</option>
+              <option value="Padrinhos">Padrinhos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="addReferenceCode">Código de Referência *</label>
+            <input v-model="newGuest.referenceCode" id="addReferenceCode" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="addInviteCode">Código do Convite *</label>
+            <input v-model="newGuest.inviteCode" id="addInviteCode" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="addKidAge">Idade da Criança (se aplicável)</label>
+            <input v-model.number="newGuest.kidAge" id="addKidAge" type="number" class="form-input" min="0" max="12" />
+          </div>
+          <div class="form-group" v-if="newGuest.kidAge">
+            <label for="addMaleKid">Sexo da Criança</label>
+            <select v-model="newGuest.maleKid" id="addMaleKid" class="form-select">
+              <option :value="false">Menina</option>
+              <option :value="true">Menino</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="addDietary">Restrições Alimentares</label>
+            <textarea v-model="newGuest.dietary" id="addDietary" class="form-textarea" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="addNotes">Observações</label>
+            <textarea v-model="newGuest.notes" id="addNotes" class="form-textarea" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="showAddGuestModal = false" class="cancel-btn">Cancelar</button>
+          <button @click="addGuest" :disabled="!newGuest.name || !newGuest.category || !newGuest.referenceCode || !newGuest.inviteCode || loading" class="add-btn">
+            {{ loading ? 'Adicionando...' : 'Adicionar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Guest Modal -->
+    <div v-if="showEditGuestModal" class="modal-overlay" @click="showEditGuestModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Editar Convidado</h3>
+          <button @click="showEditGuestModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body" v-if="editingGuest">
+          <div class="form-group">
+            <label for="editName">Nome *</label>
+            <input v-model="editingGuest.name" id="editName" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input v-model="editingGuest.email" id="editEmail" type="email" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label for="editCategory">Categoria *</label>
+            <select v-model="editingGuest.category" id="editCategory" class="form-select" required>
+              <option value="Familia">Família</option>
+              <option value="Amigos">Amigos</option>
+              <option value="Creche">Creche</option>
+              <option value="Padrinhos">Padrinhos</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editReferenceCode">Código de Referência *</label>
+            <input v-model="editingGuest.referenceCode" id="editReferenceCode" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="editInviteCode">Código do Convite *</label>
+            <input v-model="editingGuest.inviteCode" id="editInviteCode" type="text" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label for="editKidAge">Idade da Criança (se aplicável)</label>
+            <input v-model.number="editingGuest.kidAge" id="editKidAge" type="number" class="form-input" min="0" max="12" />
+          </div>
+          <div class="form-group" v-if="editingGuest.kidAge">
+            <label for="editMaleKid">Sexo da Criança</label>
+            <select v-model="editingGuest.maleKid" id="editMaleKid" class="form-select">
+              <option :value="false">Menina</option>
+              <option :value="true">Menino</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editStatus">Status</label>
+            <select v-model="editingGuest.status" id="editStatus" class="form-select">
+              <option value="REGISTERED">Registrado</option>
+              <option value="CONFIRMED">Confirmado</option>
+              <option value="ATTENDED">Compareceu</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editDietary">Restrições Alimentares</label>
+            <textarea v-model="editingGuest.dietary" id="editDietary" class="form-textarea" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editNotes">Observações</label>
+            <textarea v-model="editingGuest.notes" id="editNotes" class="form-textarea" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="showEditGuestModal = false" class="cancel-btn">Cancelar</button>
+          <button @click="updateGuest" :disabled="!editingGuest?.name || loading" class="save-btn">
+            {{ loading ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const guests = ref<any[]>([])
+const groupedGuests = ref<any[]>([])
+const stats = ref({ totalGuests: 0, totalGroups: 0, confirmedGuests: 0 })
+const loading = ref(false)
+const expandedGroups = ref<string[]>([])
+const showImportModal = ref(false)
+const showAddGuestModal = ref(false)
+const showEditGuestModal = ref(false)
+const selectedFile = ref<File | null>(null)
+const importing = ref(false)
+const fileInput = ref<HTMLInputElement>()
+const editingGuest = ref<any>(null)
+const newGuest = ref({
+  name: '',
+  email: '',
+  category: 'Familia',
+  referenceCode: '',
+  inviteCode: '',
+  kidAge: null,
+  maleKid: false,
+  dietary: '',
+  notes: ''
+})
+
+async function fetchGuests() {
+  loading.value = true
+  try {
+    const res: any = await $fetch('/api/guests')
+    if (res.success) {
+      guests.value = res.guests
+      groupedGuests.value = res.groupedGuests
+      stats.value = res.stats
+    }
+  } catch (err) {
+    console.error('Error fetching guests:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function refreshData() {
+  fetchGuests()
+}
+
+function toggleGroupDetails(referenceCode: string) {
+  const index = expandedGroups.value.indexOf(referenceCode)
+  if (index > -1) {
+    expandedGroups.value.splice(index, 1)
+  } else {
+    expandedGroups.value.push(referenceCode)
+  }
+}
+
+function handleFileSelect(event: Event) {
+  const target = event.target as HTMLInputElement
+  selectedFile.value = target.files?.[0] || null
+}
+
+async function importData() {
+  if (!selectedFile.value) return
+  
+  importing.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', selectedFile.value)
+    
+    const res: any = await $fetch('/api/import-guests', {
+      method: 'POST',
+      body: formData
+    })
+    
+    if (res.success) {
+      showImportModal.value = false
+      selectedFile.value = null
+      if (fileInput.value) fileInput.value.value = ''
+      await fetchGuests()
+      // Show success message
+    }
+  } catch (err) {
+    console.error('Error importing data:', err)
+    // Show error message
+  } finally {
+    importing.value = false
+  }
+}
+
+async function exportData() {
+  try {
+    loading.value = true
+    
+    // Fetch CSV content directly
+    const response = await fetch('/api/export-guests')
+    
+    if (!response.ok) {
+      throw new Error('Export failed')
+    }
+    
+    // Get CSV content as blob
+    const blob = await response.blob()
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `convidados-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+  } catch (err) {
+    console.error('Error exporting data:', err)
+    // Show error message
+  } finally {
+    loading.value = false
+  }
+}
+
+async function addGuest() {
+  try {
+    loading.value = true
+    
+    // Generate invite code if not provided
+    if (!newGuest.value.inviteCode) {
+      newGuest.value.inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+    }
+    
+    const res: any = await $fetch('/api/guests', {
+      method: 'POST',
+      body: {
+        ...newGuest.value,
+        status: 'REGISTERED'
+      }
+    })
+    
+    if (res.success) {
+      showAddGuestModal.value = false
+      resetNewGuest()
+      await fetchGuests()
+    }
+  } catch (err) {
+    console.error('Error adding guest:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function editGuest(guest: any) {
+  editingGuest.value = { ...guest }
+  showEditGuestModal.value = true
+}
+
+async function updateGuest() {
+  try {
+    loading.value = true
+    
+    const res: any = await $fetch(`/api/guests/${editingGuest.value.id}`, {
+      method: 'PUT',
+      body: editingGuest.value
+    })
+    
+    if (res.success) {
+      showEditGuestModal.value = false
+      editingGuest.value = null
+      await fetchGuests()
+    }
+  } catch (err) {
+    console.error('Error updating guest:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+function resetNewGuest() {
+  newGuest.value = {
+    name: '',
+    email: '',
+    category: 'Familia',
+    referenceCode: '',
+    inviteCode: '',
+    kidAge: null,
+    maleKid: false,
+    dietary: '',
+    notes: ''
+  }
+}
+
+onMounted(() => {
+  fetchGuests()
+})
+
+useHead({
+  title: 'Admin - Maria Luiza 4 Anos'
+})
+</script>
+
+<style scoped>
+/* Main Container and Layout */
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1E293B, #334155, #475569);
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header Styles */
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  color: #F8FAFC;
+  text-shadow: 0 4px 20px #00000040;
+  letter-spacing: -1px;
+}
+
+.subtitle {
+  font-weight: 700;
+  margin: 0 0 2rem 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.2rem;
+  color: #CBD5E1;
+  text-shadow: 0 2px 10px #00000040;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
+}
+
+.action-btn {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+}
+
+.import-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border-color: #34D39940;
+}
+
+.import-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px #10B98140;
+}
+
+.export-btn {
+  background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+  color: #FFFFFF;
+  border-color: #A78BFA40;
+}
+
+.export-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7C3AED, #6D28D9);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px #8B5CF640;
+}
+
+.export-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Category Badges */
+.category-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-badge.Amigos {
+  background: #3B82F6;
+  color: #FFFFFF;
+}
+
+.category-badge.Creche {
+  background: #F59E0B;
+  color: #FFFFFF;
+}
+
+.category-badge.Familia {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.category-badge.Padrinhos {
+  background: #8B5CF6;
+  color: #FFFFFF;
+}
+
+/* Group Row Styles */
+.group-row {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.group-row:hover {
+  background: #64748B25 !important;
+  transform: scale(1.01);
+}
+
+.details-row {
+  background: #64748B15 !important;
+}
+
+.guest-details {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.guest-detail-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  background: #64748B10;
+  border-radius: 8px;
+}
+
+.guest-name {
+  font-weight: 600;
+  color: #F8FAFC;
+  min-width: 120px;
+}
+
+.guest-email {
+  color: #94A3B8;
+  font-size: 0.85rem;
+}
+
+.kid-info {
+  background: #F59E0B;
+  color: #FFFFFF;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dietary {
+  background: #EF4444;
+  color: #FFFFFF;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.registered {
+  background: #64748B;
+  color: #FFFFFF;
+}
+
+.status-badge.confirmed {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.status-badge.attended {
+  background: #3B82F6;
+  color: #FFFFFF;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, #1E293B, #334155);
+  border-radius: 20px;
+  border: 1px solid #64748B30;
+  box-shadow: 0 25px 50px #00000040;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #64748B30;
+}
+
+.modal-header h3 {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #F8FAFC;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: #64748B30;
+  color: #F8FAFC;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  color: #E2E8F0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.modal-body ul {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.modal-body li {
+  margin: 0.5rem 0;
+}
+
+.modal-body input[type="file"] {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border: 1px solid #64748B40;
+  border-radius: 8px;
+  background: #64748B10;
+  color: #E2E8F0;
+  width: 100%;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #64748B30;
+  justify-content: flex-end;
+}
+
+.cancel-btn {
+  background: linear-gradient(135deg, #64748B, #475569);
+  color: #FFFFFF;
+  border: 1px solid #64748B40;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: linear-gradient(135deg, #475569, #334155);
+}
+
+.import-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border: 1px solid #34D39940;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.import-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.import-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stat-card {
+  background: linear-gradient(145deg, #64748B20, #64748B15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #64748B30;
+  box-shadow: 0 25px 50px #00000020;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 35px 70px #00000030;
+  background: linear-gradient(145deg, #64748B25, #64748B20);
+}
+
+.stat-number {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  color: #F8FAFC;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px #00000040;
+}
+
+.stat-label {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #CBD5E1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Loading and States */
+.loading {
+  text-align: center;
+  padding: 3rem;
+  color: #94A3B8;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.1rem;
+}
+
+.loading-spinner {
+  font-size: 2rem;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(145deg, #FF6B6B33, #FF6B6B1A);
+  border-radius: 12px;
+  border: 1px solid #FF6B6B4D;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #FF6B6B;
+  text-shadow: 0 1px 5px #00000033;
+}
+
+/* Buttons */
+.nav-button {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+  color: #334155;
+  border: 2px solid #CBD5E150;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 15px 35px #00000020, 0 0 0 1px #CBD5E150;
+  backdrop-filter: blur(10px);
+  margin: 2rem auto 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #FFFFFF80, transparent);
+  transition: left 0.6s;
+}
+
+.nav-button:hover::before {
+  left: 100%;
+}
+
+.nav-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 25px 50px #00000025, 0 0 0 1px #CBD5E180;
+  background: linear-gradient(135deg, #FFFFFF, #F8FAFC);
+}
+
+/* Table Styles */
+.table-container {
+  background: linear-gradient(145deg, #64748B20, #64748B15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid #64748B30;
+  box-shadow: 0 25px 50px #00000020;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.table-header h2 {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  color: #F8FAFC;
+  text-shadow: 0 2px 10px #00000040;
+}
+
+.refresh-btn {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  color: #FFFFFF;
+  border: 1px solid #60A5FA40;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563EB, #1E40AF);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px #3B82F640;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #64748B10;
+}
+
+.guests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.guests-table th {
+  background: linear-gradient(135deg, #64748B30, #64748B25);
+  color: #F8FAFC;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #64748B40;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.guests-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #64748B20;
+  color: #E2E8F0;
+  font-size: 0.95rem;
+}
+
+.guests-table tr:hover {
+  background: #64748B15;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #94A3B8;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 1.1rem;
+}
+
+.invite-code {
+  font-family: 'Courier New', monospace;
+  background: #10B981;
+  color: #FFFFFF;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.guest-count {
+  background: #8B5CF6;
+  color: #FFFFFF;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Navigation */
+.nav-section {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .admin-container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1.5rem;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+  }
+  
+  .table-container {
+    padding: 1.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+
+  .action-buttons {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    max-width: calc(100vw - 1rem);
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-container {
+    padding: 1rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
+  }
+
+  .action-buttons {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
+  }
+  
+  .nav-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .modal-content {
+    margin: 1rem;
+    width: auto;
+    max-width: calc(100vw - 2rem);
+  }
+}
+</style>

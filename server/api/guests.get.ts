@@ -10,8 +10,11 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Fetch all guests with basic info
+    // Fetch all guests with new schema fields
     const guests = await prisma.guest.findMany({
+      where: {
+        cancelledAt: null // Only show active guests
+      },
       select: {
         id: true,
         name: true,
@@ -19,7 +22,11 @@ export default defineEventHandler(async (event) => {
         inviteCode: true,
         status: true,
         dietary: true,
-        plusOnes: true,
+        category: true,
+        referenceCode: true,
+        kidAge: true,
+        maleKid: true,
+        cancelledAt: true,
         createdAt: true,
         updatedAt: true
       },
@@ -28,17 +35,32 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    // Calculate summary stats
+    // Calculate summary stats by referenceCode groups
+    const referenceGroups = new Map()
+    guests.forEach(guest => {
+      if (!referenceGroups.has(guest.referenceCode)) {
+        referenceGroups.set(guest.referenceCode, {
+          referenceCode: guest.referenceCode,
+          category: guest.category,
+          inviteCode: guest.inviteCode,
+          guests: []
+        })
+      }
+      referenceGroups.get(guest.referenceCode).guests.push(guest)
+    })
+
+    const groupedGuests = Array.from(referenceGroups.values())
     const totalGuests = guests.length
-    const totalPeople = guests.reduce((sum: number, guest: any) => sum + guest.plusOnes + 1, 0)
-    const confirmedGuests = guests.filter((guest: any) => guest.status === 'CONFIRMED').length
+    const totalGroups = groupedGuests.length
+    const confirmedGuests = guests.filter(guest => guest.status === 'CONFIRMED').length
 
     return {
       success: true,
       guests,
+      groupedGuests,
       stats: {
         totalGuests,
-        totalPeople,
+        totalGroups,
         confirmedGuests
       }
     }

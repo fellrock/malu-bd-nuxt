@@ -75,11 +75,44 @@
           Voltar ao Início
         </button>
       </div>
+      
+      <!-- Creator Reference -->
+      <div class="creator-reference">
+        <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// Define page meta for access control
+definePageMeta({
+  middleware: async (to) => {
+    // Check if user has a confirmed invitation code in query params or cookies
+    const route = useRoute()
+    const inviteCode = route.query.code as string || useCookie('confirmedCode').value
+    
+    if (inviteCode) {
+      try {
+        const res: any = await $fetch(`/api/guest-code/${inviteCode}`)
+        if (res.success && res.guests.length > 0) {
+          const hasConfirmedGuests = res.guests.some((guest: any) => guest.status === 'CONFIRMED')
+          
+          if (hasConfirmedGuests) {
+            // User has confirmed access, allow access to gifts page
+            return
+          }
+        }
+      } catch (err: any) {
+        console.error('Error checking access:', err)
+      }
+    }
+    
+    // If no confirmed access, redirect to access denied page
+    return navigateTo('/acesso-negado', { replace: true })
+  }
+})
+
 // Navigation functions
 const goHome = () => {
   navigateTo('/')
@@ -101,7 +134,7 @@ useHead({
 <style scoped>
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #ffc3a0 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   padding: 2rem 1rem;
 }
 
@@ -305,5 +338,32 @@ useHead({
     padding: 0.875rem 1.5rem;
     font-size: 1rem;
   }
+}
+
+.creator-reference {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.creator-reference p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.creator-reference a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.creator-reference a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 }
 </style>

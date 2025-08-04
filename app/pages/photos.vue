@@ -99,6 +99,11 @@
           🎁 Ver Lista de Presentes
         </a>
       </div>
+      
+      <!-- Creator Reference -->
+      <div class="creator-reference">
+        <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
+      </div>
     </div>
   </div>
 </template>
@@ -566,5 +571,32 @@ useHead({
     padding: 0.875rem 1.5rem;
     font-size: 0.95rem;
   }
+}
+
+.creator-reference {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.creator-reference p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.creator-reference a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.creator-reference a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
 }
 </style>
