@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     const guests = await prisma.guest.findMany({
       where: {
         inviteCode: inviteCode.toUpperCase(),
-        cancelledAt: null // Only active guests
+        status: { not: 'CANCELLED' as any } // Only non-cancelled guests
       },
       select: {
         id: true,

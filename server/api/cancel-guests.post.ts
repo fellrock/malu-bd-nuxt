@@ -27,10 +27,10 @@ export default defineEventHandler(async (event) => {
         id: {
           in: validatedData.guestIds
         },
-        cancelledAt: null // Only cancel active guests
+        status: { not: 'CANCELLED' as any } // Only cancel non-cancelled guests
       },
       data: {
-        cancelledAt: new Date(),
+        status: 'CANCELLED' as any,
         notes: validatedData.reason 
           ? `Cancelado: ${validatedData.reason}` 
           : 'Cancelado pelo usuário'

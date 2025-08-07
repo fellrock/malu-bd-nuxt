@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="header">
         <h1 class="title">
-          🎁 Presentes para Maria Luiza
+          Sugestões de Presentes para Maria Luiza
         </h1>
         <div class="emoji-decoration">🎁 💝 🎁</div>
       </div>

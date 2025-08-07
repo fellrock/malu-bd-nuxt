@@ -1,0 +1,555 @@
+/* ==========================================================================
+   BUTTON SYSTEM - Consistent Across All Pages
+   ========================================================================== */
+
+/* Base Button Styles */
+.btn {
+  /* Reset */
+  border: none;
+  outline: none;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  
+  /* Typography */
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+  
+  /* Spacing */
+  padding: var(--space-lg) var(--space-2xl);
+  
+  /* Appearance */
+  border-radius: var(--radius-xl);
+  min-height: 2.75rem;
+  
+  /* Transitions */
+  transition: all var(--transition-base);
+  
+  /* Glass-morphism base */
+  backdrop-filter: var(--glass-backdrop);
+  border: 1px solid transparent;
+  
+  /* Prevent text selection */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: var(--space-md) var(--space-xl);
+  font-size: var(--font-size-sm);
+  min-height: 2.25rem;
+  border-radius: var(--radius-lg);
+}
+
+.btn-lg {
+  padding: var(--space-xl) var(--space-3xl);
+  font-size: var(--font-size-lg);
+  min-height: 3.25rem;
+  border-radius: var(--radius-2xl);
+}
+
+.btn-xl {
+  padding: var(--space-2xl) var(--space-4xl);
+  font-size: var(--font-size-xl);
+  min-height: 3.75rem;
+  border-radius: var(--radius-2xl);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-button);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary-darker) 100%);
+  transform: translateY(-2px) scale(var(--hover-scale));
+  box-shadow: var(--shadow-button-hover);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(var(--active-scale));
+  box-shadow: var(--shadow-md);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: var(--gradient-secondary);
+  color: var(--color-white);
+  border-color: var(--color-secondary);
+  box-shadow: var(--shadow-button);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-secondary-dark) 0%, var(--color-secondary-darker) 100%);
+  transform: translateY(-2px) scale(var(--hover-scale));
+  box-shadow: var(--shadow-button-hover);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(var(--active-scale));
+  box-shadow: var(--shadow-md);
+}
+
+/* Danger Button */
+.btn-danger {
+  background: var(--gradient-danger);
+  color: var(--color-white);
+  border-color: var(--color-danger);
+  box-shadow: var(--shadow-button);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-danger-dark) 0%, var(--color-danger-darker) 100%);
+  transform: translateY(-2px) scale(var(--hover-scale));
+  box-shadow: var(--shadow-button-hover);
+}
+
+.btn-danger:active:not(:disabled) {
+  transform: translateY(0) scale(var(--active-scale));
+  box-shadow: var(--shadow-md);
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-gray-200);
+  border-color: rgba(255, 255, 255, 0.25);
+  backdrop-filter: var(--glass-backdrop);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+  transform: translateY(-1px) scale(var(--hover-scale));
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-ghost:active:not(:disabled) {
+  transform: translateY(0) scale(var(--active-scale));
+}
+
+/* Success Button */
+.btn-success {
+  background: var(--gradient-success);
+  color: var(--color-white);
+  border-color: var(--color-success);
+  box-shadow: var(--shadow-button);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--color-success-dark) 0%, var(--color-primary-darker) 100%);
+  transform: translateY(-2px) scale(var(--hover-scale));
+  box-shadow: var(--shadow-button-hover);
+}
+
+/* Button States */
+.btn:disabled {
+  background: linear-gradient(135deg, var(--color-gray-600) 0%, var(--color-gray-700) 100%);
+  color: var(--color-gray-400);
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
+  box-shadow: none;
+}
+
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading State */
+.btn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: -0.625rem 0 0 -0.625rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid var(--color-white);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Button Icons */
+.btn-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.btn-sm .btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.btn-lg .btn-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.btn-xl .btn-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+/* Full Width Button */
+.btn-full {
+  width: 100%;
+}
+
+/* ==========================================================================
+   LOADING STATES & ANIMATIONS
+   ========================================================================== */
+
+.loading-spinner {
+  width: var(--space-2xl);
+  height: var(--space-2xl);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid var(--color-white);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+.loading-spinner-lg {
+  width: var(--space-4xl);
+  height: var(--space-4xl);
+  border-width: 3px;
+}
+
+.loading-spinner-sm {
+  width: var(--space-lg);
+  height: var(--space-lg);
+  border-width: 1px;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, var(--color-gray-700) 25%, var(--color-gray-600) 50%, var(--color-gray-700) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Fade in animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bounce animation for success states */
+.bounce-in {
+  animation: bounceIn 0.6s ease-out;
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Pulse for attention */
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ==========================================================================
+   MOBILE-FIRST RESPONSIVE DESIGN
+   ========================================================================== */
+
+/* Extra Small Mobile (320px - 479px) */
+@media (max-width: 479px) {
+  .btn {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-sm);
+    min-height: 2.5rem;
+  }
+  
+  .btn-lg {
+    padding: var(--space-lg) var(--space-xl);
+    font-size: var(--font-size-base);
+    min-height: 2.75rem;
+  }
+  
+  .btn-xl {
+    padding: var(--space-xl) var(--space-2xl);
+    font-size: var(--font-size-lg);
+    min-height: 3rem;
+  }
+  
+  /* Stack buttons vertically on very small screens */
+  .btn-group-mobile-stack {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-group-mobile-stack .btn {
+    width: 100%;
+  }
+}
+
+/* Small Mobile (480px - 767px) */
+@media (max-width: 767px) {
+  .btn-full-mobile {
+    width: 100%;
+  }
+  
+  .btn-text-mobile-hidden {
+    display: none;
+  }
+  
+  /* Increase touch targets for mobile */
+  .btn {
+    min-height: 44px; /* iOS recommended minimum */
+  }
+  
+  .btn-sm {
+    min-height: 40px;
+  }
+}
+
+/* Tablet (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .btn-tablet-full {
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   ACCESSIBILITY IMPROVEMENTS
+   ========================================================================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border-width: 2px;
+    font-weight: var(--font-weight-bold);
+  }
+  
+  .btn:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .loading-spinner,
+  .fade-in,
+  .slide-up,
+  .bounce-in,
+  .pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .btn:hover {
+    transform: none !important;
+  }
+}
+
+/* Focus management for keyboard navigation */
+.btn:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.3);
+}
+
+/* Screen reader support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   TOAST NOTIFICATIONS
+   ========================================================================== */
+
+.toast {
+  position: fixed;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: var(--z-toast);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg) var(--space-xl);
+  color: var(--color-white);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-xl);
+  min-width: 300px;
+  max-width: 500px;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast.success {
+  border-left: 4px solid var(--color-success);
+}
+
+.toast.error {
+  border-left: 4px solid var(--color-danger);
+}
+
+.toast.warning {
+  border-left: 4px solid var(--color-warning);
+}
+
+.toast.info {
+  border-left: 4px solid var(--color-secondary);
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Mobile toast positioning */
+@media (max-width: 767px) {
+  .toast {
+    top: var(--space-lg);
+    left: var(--space-lg);
+    right: var(--space-lg);
+    min-width: auto;
+    max-width: none;
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ==========================================================================
+   THEME EXTENSIONS
+   ========================================================================== */
+
+/* Party-specific enhancements */
+.party-gradient-text {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-accent), var(--color-primary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.celebration-shadow {
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.3),
+    0 0 40px rgba(245, 158, 11, 0.2),
+    0 0 60px rgba(16, 185, 129, 0.1);
+}
+
+/* Confetti-inspired decorative elements */
+.decorative-dots::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: radial-gradient(circle at 20% 50%, var(--color-secondary) 2px, transparent 2px),
+              radial-gradient(circle at 80% 50%, var(--color-accent) 2px, transparent 2px),
+              radial-gradient(circle at 40% 20%, var(--color-primary) 2px, transparent 2px);
+  background-size: 30px 30px;
+  opacity: 0.3;
+  z-index: -1;
+  border-radius: inherit;
+}
