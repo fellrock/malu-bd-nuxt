@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     // Fetch all guests with new schema fields
     const guests = await prisma.guest.findMany({
       where: {
-        cancelledAt: null // Only show active guests
+        status: { not: 'CANCELLED' as any } // Only show non-cancelled guests
       },
       select: {
         id: true,
@@ -26,7 +26,6 @@ export default defineEventHandler(async (event) => {
         referenceCode: true,
         kidAge: true,
         maleKid: true,
-        cancelledAt: true,
         createdAt: true,
         updatedAt: true
       },

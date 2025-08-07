@@ -1,292 +1,231 @@
 <template>
   <div class="event-container">
-    <div class="header">
-      <h1 class="title">Maria Luiza faz 4 aninhos! 🎉</h1>
-      <p class="subtitle">Informações do Evento</p>
+    <!-- Header with Theme Toggle -->
+    <div class="header mb-4xl animate-fadeInUp">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="title">
+            <span class="mobile-title">Festa da MaLu! 🎉</span>
+            <span class="desktop-title">🎉 Festa da Maria Luiza!</span>
+          </h1>
+          <p class="subtitle">Informações do Evento - 4 Aninhos</p>
+        </div>
+      </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading">
-      Carregando informações do evento...
+    <div v-if="loading" class="loading-state glass-card animate-fadeInScale">
+      <div class="loading-spinner animate-spin"></div>
+      <p>Carregando informações do evento...</p>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="error">
-      {{ error }}
+    <div v-else-if="error" class="error-state glass-card animate-fadeInUp">
+      <Icon name="exclamation-triangle" size="48" class="error-icon mb-lg" />
+      <h3 class="mb-md">Ops! Algo deu errado</h3>
+      <p class="mb-lg">{{ error }}</p>
+      <button @click="fetchEventData" class="btn-primary">
+        <Icon name="arrow-path" size="16" />
+        Tentar novamente
+      </button>
     </div>
 
     <!-- Event Content -->
-    <div v-else class="event-content">
-      <!-- Guest Information -->
-      <div v-if="referenceInfo" class="guest-info-card">
-        <div class="card-header">
-          <h2>
-            <UsersIcon class="icon-responsive inline mr-2" />
-            Convidados
-          </h2>
-          <div class="reference-info">
-            <strong>{{ referenceInfo.referenceCode }}</strong>
-            <span v-if="hasConfirmedGuests" class="confirmed-badge">Confirmado</span>
-          </div>
-        </div>
-        
-        <div class="guests-list">
-          <div v-for="guest in guests" :key="guest.id" class="guest-item">
-            <div class="guest-info">
-              <span class="guest-name">{{ guest.name }}</span>
-              <div class="guest-details">
-                <span v-if="guest.email" class="guest-email">{{ guest.email }}</span>
-                <span v-if="guest.kidAge" class="kid-info">
-                  Criança: {{ guest.kidAge }} anos ({{ guest.maleKid ? 'Menino' : 'Menina' }})
-                </span>
-                <span v-if="guest.dietary" class="dietary">Restrições: {{ guest.dietary }}</span>
-              </div>
-            </div>
-            <div class="guest-actions">
-              <button @click="editGuest(guest)" class="edit-btn" title="Editar">
-                <PencilIcon class="icon-xs" />
-                <span class="btn-text-desktop">Editar</span>
-              </button>
-              <button @click="cancelGuest(guest)" class="cancel-btn" title="Cancelar">
-                <XMarkIcon class="icon-xs" />
-                <span class="btn-text-desktop">Cancelar</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Family Actions -->
-        <div class="family-actions">
-          <button @click="rejectFamily" class="reject-family-btn">
-            <XMarkIcon class="icon-sm" /> 
-            <span class="btn-text">Cancelar Participação de Todos</span>
-            <span class="btn-text-mobile">Cancelar Todos</span>
-          </button>
-        </div>
-      </div>
-
+    <div v-else-if="referenceInfo" class="event-content animate-fadeInUp">
+      
       <!-- Countdown Card -->
-      <div class="countdown-card">
+      <div class="countdown-card glass-card animate-fadeInScale stagger-1">
         <h2 class="card-title">
-          <ClockIcon class="icon-responsive inline mr-2" />
+          <Icon name="clock" size="20" />
           Contagem Regressiva
         </h2>
         <div class="countdown-display">
           <div class="countdown-time">{{ timeLeft }}</div>
+          <p class="countdown-label">Para a festa da Maria Luiza!</p>
+        </div>
+      </div>
+
+      <!-- Guest List Card -->
+      <div class="guest-card glass-card animate-fadeInScale stagger-2">
+        <div class="card-header">
+          <h2 class="card-title">
+            <Icon name="users" size="20" />
+            <span class="mobile-title">Confirmados</span>
+            <span class="desktop-title">Convidados Confirmados</span>
+          </h2>
+        </div>
+
+        <div v-if="guests.length === 0" class="empty-state">
+          <Icon name="user-group" size="48" class="empty-icon" />
+          <p>Nenhum convidado encontrado.</p>
+        </div>
+
+        <div v-else class="guests-list">
+          <div v-for="guest in guests" :key="guest.id" class="guest-item">
+            <div class="guest-info">
+              <h3 class="guest-name">{{ guest.name }}</h3>
+              <div class="guest-details">
+                <p v-if="guest.email"><strong>Email:</strong> {{ guest.email }}</p>
+                <p v-if="guest.kidAge"><strong>Criança:</strong> {{ guest.kidAge }} anos ({{ guest.maleKid ? 'Menino' : 'Menina' }})</p>
+                <p v-if="guest.dietary"><strong>Restrições:</strong> {{ guest.dietary }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Family Actions -->
+        <div v-if="guests.length > 0" class="family-actions">
+          <button @click="showEditAllModal = true" class="family-action-btn edit-btn">
+            <Icon name="pencil-square" size="20" />
+            Editar
+          </button>          
+          <button @click="showCancelAllModal = true" class="family-action-btn cancel-btn">
+            <Icon name="x-mark" size="20" />
+            Desistência
+          </button>
         </div>
       </div>
 
       <!-- Event Timeline -->
-      <div class="timeline-card">
-        <h2 class="card-title">
-          <CalendarDaysIcon class="icon-responsive inline mr-2" />
+      <div class="timeline-card glass-card animate-fadeInScale stagger-3">
+        <h2 class="card-title timeline-title">
+          <Icon name="calendar-days" size="20" />
           Cronograma do Evento
         </h2>
         <div class="timeline">
           <div class="timeline-item">
             <div class="timeline-time">10h00</div>
             <div class="timeline-content">
-              <strong>Recepção</strong><br>
+              <strong>🎊 Recepção</strong><br>
               Chegada dos convidados e boas-vindas
             </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-time">10h30</div>
             <div class="timeline-content">
-              <strong>Brincadeiras</strong><br>
+              <strong>🎮 Brincadeiras</strong><br>
               Atividades e diversão para as crianças
             </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-time">11h30</div>
             <div class="timeline-content">
-              <strong>Parabéns</strong><br>
+              <strong>🎂 Parabéns</strong><br>
               Cantamos parabéns e cortamos o bolo
             </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-time">12h00</div>
             <div class="timeline-content">
-              <strong>Almoço</strong><br>
+              <strong>🍽️ Almoço</strong><br>
               Servimos o almoço para todos
             </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-time">13h00</div>
             <div class="timeline-content">
-              <strong>Fotos</strong><br>
+              <strong>📸 Fotos</strong><br>
               Sessão de fotos com a aniversariante
             </div>
           </div>
           <div class="timeline-item">
             <div class="timeline-time">14h00</div>
             <div class="timeline-content">
-              <strong>Encerramento</strong><br>
+              <strong>🎁 Encerramento</strong><br>
               Despedida e lembrancinhas
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Photo Album -->
-      <div class="photos-card">
-        <h2 class="card-title">
-          <CameraIcon class="icon-responsive inline mr-2" />
-          Album de Fotos
-        </h2>
-        <div class="photo-sharing">
-          <p class="photo-description">
-            Compartilhe suas fotos da festa conosco! Clique na imagem do QR Code abaixo para acessar o álbum compartilhado do Google Photos.
-          </p>
-          <div class="qr-section">
-            <a href="https://photos.google.com/share/album-link" target="_blank" class="qr-link">
-              <div class="qr-code-image">
-                <div class="qr-placeholder">
-                  <QrCodeIcon class="icon-xl mx-auto mb-2" />
-                  <strong>QR Code</strong><br>
-                  <small>Clique para acessar<br>o álbum de fotos</small>
+      <!-- Additional Info Cards -->
+      <div class="info-cards">
+        <!-- Location Card -->
+        <div class="location-card glass-card animate-fadeInScale stagger-4">
+          <h3 class="info-title">
+            <Icon name="map-pin" size="20" />
+            Local
+          </h3>
+          <div class="location-content">
+            <div class="location-logo">
+              <a 
+                href="https://www.instagram.com/oquintal_oficial/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="logo-instagram-link"
+                title="Visite o Instagram do O Quintal Oficial"
+              >
+                <img src="/oquintal_logo.jpg" alt="O Quintal Oficial" class="quintal-logo" />
+                <div class="instagram-overlay">
+                  <Icon name="camera" size="20" />
                 </div>
+              </a>
+            </div>
+                        <div class="location-details">
+              <h3>Quintal Cores</h3>
+              <p class="address">Av. Genaro de Carvalho 3555, Recreio dos Bandeirantes - Rio de Janeiro, RJ</p>
+              
+              <div class="parking-info">
+                <Icon name="truck" size="16" class="parking-icon" />
+                <span>
+                  Estacionamento livre nas ruas adjacentes a casa de festa
+                </span>
               </div>
-            </a>
-            <p class="qr-instruction">👆 Clique na imagem para abrir o álbum</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Gift Suggestions -->
-      <div class="gifts-card">
-        <h2 class="card-title">
-          <GiftIcon class="icon-responsive inline mr-2" />
-          Ideias de Presentes
-        </h2>
-        <div class="gifts-info">
-          <p>Sua presença já é o melhor presente! Mas se quiser dar algo especial para Maria Luiza, temos algumas sugestões.</p>
-          <button @click="goToGifts" class="gifts-link">
-            <GiftIcon class="icon-sm" /> 
-            <span class="btn-text">Ver Sugestões de Presentes</span>
-            <span class="btn-text-mobile">Ver Presentes</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Location Card -->
-      <div class="location-card">
-        <h2 class="card-title">
-          <MapPinIcon class="icon-responsive inline mr-2" />
-          Local da Festa
-        </h2>
-        <div class="location-info">
-          <div class="venue-details">
-            <strong>Quintal Cores</strong><br>
-            <span class="address-line">Av. Genaro de Carvalho, 3555</span><br>
-            <span class="address-line">Recreio - Rio de Janeiro, RJ</span>
-          </div>
-          <a href="https://maps.google.com/?q=Quintal+Cores+Recreio+RJ" target="_blank" class="map-link">
-            🗺️ Ver no Mapa
-          </a>
-        </div>
-      </div>
-
-      <!-- Dress Code -->
-      <div class="dress-card">
-        <h2 class="card-title">
-          <SparklesIcon class="icon-responsive inline mr-2" />
-          Roupa & Diversão
-        </h2>
-        <div class="dress-info">
-          <div class="dress-item">
-            <span class="dress-icon">🌈</span>
-            <span class="dress-text">Roupa colorida e confortável</span>
-          </div>
-          <div class="dress-item">
-            <span class="dress-icon">👟</span>
-            <span class="dress-text">Sapatos fechados para brincar</span>
-          </div>
-          <div class="dress-item">
-            <span class="dress-icon">🏊‍♀️</span>
-            <span class="dress-text">Traga roupa de banho (tem piscina!)</span>
-          </div>
-          <div class="dress-item">
-            <span class="dress-icon">🧴</span>
-            <span class="dress-text">Protetor solar e toalha</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Parking Info -->
-      <div class="parking-card">
-        <h2 class="card-title">
-          <TruckIcon class="icon-responsive inline mr-2" />
-          Estacionamento
-        </h2>
-        <div class="parking-info">
-          <div class="parking-item">
-            <span class="parking-icon">🆓</span>
-            <span class="parking-text"><strong>Gratuito</strong> - Estacionamento no local</span>
-          </div>
-          <div class="parking-item">
-            <span class="parking-icon">🚪</span>
-            <span class="parking-text">Entrada pela <strong>Rua das Palmeiras</strong></span>
-          </div>
-          <div class="parking-item">
-            <span class="parking-icon">🚗</span>
-            <span class="parking-text">Vagas limitadas - chegue cedo!</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Guest Modal -->
-    <div v-if="editingGuest" class="modal-overlay" @click="closeEditModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>Editar Convidado</h3>
-          <button @click="closeEditModal" class="close-btn">×</button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveGuestEdit">
-            <div class="form-group">
-              <label>Nome:</label>
-              <input v-model="editForm.name" type="text" required class="form-input" />
-            </div>
-            <div class="form-group">
-              <label>E-mail:</label>
-              <input v-model="editForm.email" type="email" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label>Restrições alimentares:</label>
-              <textarea v-model="editForm.dietary" class="form-textarea" rows="2"></textarea>
-            </div>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" :checked="!!editForm.kidAge" @change="toggleKidEdit" />
-                É criança
-              </label>
-            </div>
-            <div v-if="editForm.kidAge !== null" class="kid-fields">
-              <div class="form-group">
-                <label>Idade:</label>
-                <input v-model.number="editForm.kidAge" type="number" min="0" max="18" class="form-input" />
+              
+              <div class="map-container">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58752.716730123095!2d-43.55529185136721!3d-23.0221274!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9bc3987187d51b%3A0xa57010c368101b00!2sO%20Quintal%20-%20CORES%20%7C%20Espa%C3%A7o%20de%20Festas*21!5e0!3m2!1spt-BR!2sbr!4v1754557772317!5m2!1spt-BR!2sbr" 
+                  width="100%" 
+                  height="200" 
+                  style="border:0; border-radius: var(--radius-md);" 
+                  allowfullscreen
+                  loading="lazy" 
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Localização do Quintal Cores"
+                ></iframe>
               </div>
-              <div class="form-group">
-                <label>Sexo:</label>
-                <select v-model="editForm.maleKid" class="form-select">
-                  <option value="">Selecione</option>
-                  <option :value="true">Menino</option>
-                  <option :value="false">Menina</option>
-                </select>
+              
+              <div class="location-actions">
+                <a 
+                  href="https://maps.app.goo.gl/S7m79NeXWVEHS2eJ8" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="directions-link"
+                >
+                  <Icon name="map-pin" size="16" class="directions-icon" />
+                  <span>Ver direções no Google Maps</span>
+                  <Icon name="arrow-top-right-on-square" size="16" class="external-icon" />
+                </a>
               </div>
             </div>
-            <div class="form-group">
-              <label>Observações:</label>
-              <textarea v-model="editForm.notes" class="form-textarea" rows="2"></textarea>
-            </div>
-          </form>
+          </div>
         </div>
-        <div class="modal-actions">
-          <button @click="closeEditModal" class="cancel-btn">Cancelar</button>
-          <button @click="saveGuestEdit" :disabled="saving" class="save-btn">
-            {{ saving ? 'Salvando...' : 'Salvar' }}
+
+        <!-- Dress Code Card -->
+        <div class="dress-card glass-card animate-fadeInScale stagger-5">
+          <h3 class="info-title">
+            <Icon name="sparkles" size="20" />
+            Traje
+          </h3>
+          <p class="info-content">
+            Casual e Colorido!<br>
+            Vista-se com cores alegres para celebrar com a Maria Luiza.
+          </p>
+        </div>
+
+        <!-- Gifts Card -->
+        <div class="gifts-card glass-card animate-fadeInScale stagger-6">
+          <h3 class="info-title">
+            <Icon name="gift" size="20" />
+            Presentes
+          </h3>
+          <p class="info-content">
+            Sua presença já é o melhor presente!<br>
+            Mas se quiser saber nossas sugestões...
+          </p>
+          <button @click="goToGifts" class="gifts-btn">
+            <Icon name="gift" size="16" />
+            Ver Sugestões
           </button>
         </div>
       </div>
@@ -296,72 +235,68 @@
     <div v-if="cancellingGuest" class="modal-overlay" @click="closeCancelModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Cancelar Convidado</h3>
+          <h3>Cancelar Participação</h3>
+          <button @click="closeCancelModal" class="close-btn">×</button>
         </div>
         <div class="modal-body">
-          <p>Tem certeza que deseja cancelar a presença de <strong>{{ cancellingGuest.name }}</strong>?</p>
-          <p>Esta ação não pode ser desfeita.</p>
+          <p>Tem certeza que deseja cancelar a participação de <strong>{{ cancellingGuest.name }}</strong>?</p>
         </div>
         <div class="modal-actions">
-          <button @click="closeCancelModal" class="cancel-btn">Não, Manter</button>
-          <button @click="confirmCancelGuest" :disabled="cancelling" class="delete-btn">
+          <button @click="closeCancelModal" class="cancel-btn">Não</button>
+          <button @click="confirmCancelGuest" :disabled="cancelling" class="confirm-btn">
             {{ cancelling ? 'Cancelando...' : 'Sim, Cancelar' }}
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Reject Family Modal -->
-    <div v-if="showRejectFamilyDialog" class="modal-overlay" @click="closeRejectFamilyDialog">
+    <!-- Edit All Guests Confirmation Modal -->
+    <div v-if="showEditAllModal" class="modal-overlay" @click="showEditAllModal = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Cancelar Participação de Todos</h3>
+          <h3>Editar Confirmação</h3>
+          <button @click="showEditAllModal = false" class="close-btn">×</button>
         </div>
         <div class="modal-body">
-          <p>Tem certeza que deseja cancelar a participação de <strong>todos os convidados</strong>?</p>
-          <p>Esta ação cancelará a presença de todos os convidados do grupo:</p>
-          <ul>
-            <li v-for="guest in guests" :key="guest.id">
-              <strong>{{ guest.name }}</strong>
-            </li>
-          </ul>
-          <p><strong>Esta ação não pode ser desfeita.</strong></p>
+          <p>Deseja editar as informações dos convidados?</p>
+          <p class="text-sm text-secondary">Isso irá mudar o status para "Pendente" e você será redirecionado para a página de convite para fazer as alterações.</p>
         </div>
         <div class="modal-actions">
-          <button @click="closeRejectFamilyDialog" class="cancel-btn">Não, Manter</button>
-          <button @click="confirmRejectFamily" :disabled="rejectingFamily" class="delete-btn">
-            {{ rejectingFamily ? 'Cancelando...' : 'Sim, Cancelar Todos' }}
+          <button @click="showEditAllModal = false" class="cancel-btn">Cancelar</button>
+          <button @click="confirmEditAllGuests" :disabled="saving" class="save-btn">
+            {{ saving ? 'Processando...' : 'Sim, Editar' }}
           </button>
         </div>
       </div>
     </div>
-    
-    <!-- Creator Reference -->
-    <div class="creator-reference">
-      <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
+
+    <!-- Cancel All Guests Confirmation Modal -->
+    <div v-if="showCancelAllModal" class="modal-overlay" @click="showCancelAllModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Cancelar Participação</h3>
+          <button @click="showCancelAllModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Tem certeza que deseja cancelar a participação de <strong>todos os convidados</strong> desta família?</p>
+          <p class="text-sm text-secondary">Esta ação não pode ser desfeita. Todos os convidados terão seu status alterado para "Cancelado".</p>
+        </div>
+        <div class="modal-actions">
+          <button @click="showCancelAllModal = false" class="cancel-btn">Não</button>
+          <button @click="confirmCancelAllGuests" :disabled="cancellingAll" class="confirm-btn">
+            {{ cancellingAll ? 'Cancelando...' : 'Sim, Cancelar Todos' }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import {
-  UsersIcon,
-  ClockIcon,
-  CalendarDaysIcon,
-  CameraIcon,
-  GiftIcon,
-  MapPinIcon,
-  TruckIcon,
-  PencilIcon,
-  XMarkIcon,
-  CheckIcon,
-  QrCodeIcon,
-  SparklesIcon,
-  ShieldCheckIcon
-} from '@heroicons/vue/24/solid'
+import ThemeToggle from '~/components/ThemeToggle.vue'
 
-// Define page meta for middleware
+// Page meta for middleware - STRICT: Only CONFIRMED guests allowed
 definePageMeta({
   middleware: async (to) => {
     const inviteCode = to.params.code as string
@@ -369,31 +304,38 @@ definePageMeta({
       try {
         const res: any = await $fetch(`/api/guest-code/${inviteCode}`)
         if (res.success && res.guests.length > 0) {
-          const hasConfirmedGuests = res.guests.some((guest: any) => guest.status === 'CONFIRMED')
-          const hasRegisteredGuests = res.guests.some((guest: any) => guest.status === 'REGISTERED')
+          const statuses = res.guests.map((guest: any) => guest.status)
           
-          // Only redirect to invitation page if NO guests are confirmed (all are registered)
-          if (hasRegisteredGuests && !hasConfirmedGuests) {
+          // If all guests are CANCELLED, redirect to main page
+          if (statuses.every((s: string) => s === 'CANCELLED')) {
+            return navigateTo(`/${inviteCode}`, { replace: true })
+          }
+          
+          // If guests are still PENDING, redirect to invitation page
+          if (statuses.some((s: string) => s === 'PENDING')) {
             return navigateTo(`/convite/${inviteCode}`, { replace: true })
           }
           
-          // If there are confirmed guests, stay on event page (even if some are still registered)
+          // If guests are still REGISTERED, redirect to main page
+          if (statuses.some((s: string) => s === 'REGISTERED')) {
+            return navigateTo(`/${inviteCode}`, { replace: true })
+          }
+          
+          // If any guest is CONFIRMED, allow access to this page
+          if (statuses.some((s: string) => s === 'CONFIRMED')) {
+            return
+          }
+          
+          // Fallback: redirect to main page
+          return navigateTo(`/${inviteCode}`, { replace: true })
         } else {
-          // If no guests found, redirect to access denied page
           return navigateTo('/acesso-negado', { replace: true })
         }
       } catch (err: any) {
         console.error('Error in middleware:', err)
-        // On API error (404, etc.), redirect to access denied page
-        if (err.statusCode === 404) {
-          return navigateTo('/acesso-negado', { replace: true })
-        } else {
-          // For other server errors, redirect to access denied page
-          return navigateTo('/acesso-negado', { replace: true })
-        }
+        return navigateTo('/acesso-negado', { replace: true })
       }
     } else {
-      // If no invite code, redirect to access denied page
       return navigateTo('/acesso-negado', { replace: true })
     }
   }
@@ -410,26 +352,23 @@ const timeLeft = ref('')
 const referenceInfo = ref<any>(null)
 const guests = ref<any[]>([])
 
+// Edit modal state
+const showEditAllModal = ref(false)
+const showCancelAllModal = ref(false)
+const saving = ref(false)
+
+// Cancel modal state
+const cancellingGuest = ref<any>(null)
+const cancelling = ref(false)
+const cancellingAll = ref(false)
+
+// Countdown timer
+let countdownInterval: NodeJS.Timeout
+
 // Computed properties
 const hasConfirmedGuests = computed(() => {
   return guests.value.some(guest => guest.status === 'CONFIRMED')
 })
-
-// Edit guest modal
-const editingGuest = ref<any>(null)
-const editForm = ref<any>({})
-const saving = ref(false)
-
-// Cancel guest modal
-const cancellingGuest = ref<any>(null)
-const cancelling = ref(false)
-
-// Reject family modal
-const showRejectFamilyDialog = ref(false)
-const rejectingFamily = ref(false)
-
-// Countdown timer
-let countdownInterval: NodeJS.Timeout
 
 async function fetchEventData() {
   if (!inviteCode.value) {
@@ -445,7 +384,7 @@ async function fetchEventData() {
     
     if (res.success) {
       referenceInfo.value = res.referenceInfo
-      guests.value = res.guests
+      guests.value = res.guests.filter((guest: any) => guest.status === 'CONFIRMED')
       
       // Store invitation code in session for gift page access
       const invitationCookie = useCookie('invitationCode', {
@@ -472,81 +411,15 @@ function updateCountdown() {
   const now = new Date()
   const difference = eventDate.getTime() - now.getTime()
 
-  if (difference <= 0) {
-    timeLeft.value = 'A festa já começou! 🎉'
-    return
-  }
+  if (difference > 0) {
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((difference % (1000 * 60)) / 1000)
 
-  const days = Math.floor(difference / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
-  const seconds = Math.floor((difference % (1000 * 60)) / 1000)
-
-  timeLeft.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
-}
-
-function editGuest(guest: any) {
-  editingGuest.value = guest
-  editForm.value = {
-    name: guest.name,
-    email: guest.email || '',
-    dietary: guest.dietary || '',
-    kidAge: guest.kidAge,
-    maleKid: guest.maleKid,
-    notes: guest.notes || ''
-  }
-}
-
-function closeEditModal() {
-  editingGuest.value = null
-  editForm.value = {}
-}
-
-function toggleKidEdit(event: Event) {
-  const isChecked = (event.target as HTMLInputElement).checked
-  if (isChecked) {
-    editForm.value.kidAge = 0
-    editForm.value.maleKid = null
+    timeLeft.value = `${days}d ${hours}h ${minutes}m ${seconds}s`
   } else {
-    editForm.value.kidAge = null
-    editForm.value.maleKid = null
-  }
-}
-
-async function saveGuestEdit() {
-  if (!editingGuest.value || !editForm.value.name.trim()) return
-  
-  saving.value = true
-  
-  try {
-    const res: any = await $fetch('/api/group-guests', {
-      method: 'PUT',
-      body: {
-        inviteCode: inviteCode.value,
-        referenceCode: referenceInfo.value.referenceCode,
-        category: referenceInfo.value.category,
-        guests: [{
-          id: editingGuest.value.id,
-          name: editForm.value.name.trim(),
-          email: editForm.value.email.trim() || null,
-          dietary: editForm.value.dietary.trim() || null,
-          kidAge: editForm.value.kidAge || null,
-          maleKid: editForm.value.maleKid,
-          notes: editForm.value.notes.trim() || null,
-          status: editingGuest.value.status
-        }]
-      }
-    })
-
-    if (res.success) {
-      closeEditModal()
-      await fetchEventData() // Refresh data
-    }
-  } catch (err: any) {
-    console.error('Error saving guest:', err)
-    alert('Erro ao salvar alterações. Tente novamente.')
-  } finally {
-    saving.value = false
+    timeLeft.value = "A festa começou! 🎉"
   }
 }
 
@@ -559,63 +432,93 @@ function closeCancelModal() {
 }
 
 async function confirmCancelGuest() {
-  if (!cancellingGuest.value) return
-  
   cancelling.value = true
   
   try {
-    const res: any = await $fetch('/api/cancel-guests', {
+    await $fetch('/api/cancel-guests', {
       method: 'POST',
       body: {
         guestIds: [cancellingGuest.value.id],
-        reason: 'Cancelado pelo usuário na página do evento'
+        reason: 'Cancelado pelo convidado na página do evento'
       }
     })
-
-    if (res.success) {
-      closeCancelModal()
-      await fetchEventData() // Refresh data
-    }
+    
+    // Remove from local list
+    guests.value = guests.value.filter(g => g.id !== cancellingGuest.value.id)
+    
+    closeCancelModal()
+    alert('Participação cancelada com sucesso.')
   } catch (err: any) {
     console.error('Error cancelling guest:', err)
-    alert('Erro ao cancelar convidado. Tente novamente.')
+    alert('Erro ao cancelar participação. Tente novamente.')
   } finally {
     cancelling.value = false
   }
 }
 
-function rejectFamily() {
-  showRejectFamilyDialog.value = true
+function editAllGuests() {
+  // Navigate to invitation form to edit all guests
+  navigateTo(`/convite/${inviteCode.value}`)
 }
 
-function closeRejectFamilyDialog() {
-  showRejectFamilyDialog.value = false
-}
-
-async function confirmRejectFamily() {
-  rejectingFamily.value = true
+async function confirmEditAllGuests() {
+  saving.value = true
   
   try {
-    const guestIds = guests.value.map(guest => guest.id).filter(Boolean)
+    // Get all confirmed guest IDs
+    const confirmedGuestIds = guests.value.map(guest => guest.id)
     
-    if (guestIds.length > 0) {
-      await $fetch('/api/cancel-guests', {
-        method: 'POST',
-        body: {
-          guestIds,
-          reason: 'Convite recusado pela família na página do evento'
-        }
-      })
-    }
-
-    closeRejectFamilyDialog()
-    alert('Participação de todos os convidados cancelada com sucesso.')
-    router.push('/')
+    // Update all guests status to PENDING using the change-to-pending endpoint
+    await $fetch('/api/change-to-pending', {
+      method: 'POST',
+      body: {
+        inviteCode: inviteCode.value,
+        guestIds: confirmedGuestIds
+      }
+    })
+    
+    showEditAllModal.value = false
+    
+    // Navigate to invitation page for editing
+    navigateTo(`/convite/${inviteCode.value}`)
   } catch (err: any) {
-    console.error('Error rejecting family invitation:', err)
-    alert('Erro ao recusar convite da família. Tente novamente.')
+    console.error('Error updating guest status:', err)
+    alert('Erro ao atualizar status dos convidados. Tente novamente.')
   } finally {
-    rejectingFamily.value = false
+    saving.value = false
+  }
+}
+
+async function confirmCancelAllGuests() {
+  cancellingAll.value = true
+  
+  try {
+    // Get all confirmed guest IDs
+    const confirmedGuestIds = guests.value.map(guest => guest.id)
+    
+    // Cancel all guests
+    await $fetch('/api/cancel-guests', {
+      method: 'POST',
+      body: {
+        guestIds: confirmedGuestIds,
+        reason: 'Cancelado em massa pelo convidado na página do evento'
+      }
+    })
+    
+    showCancelAllModal.value = false
+    
+    // Clear local guests list since all are cancelled
+    guests.value = []
+    
+    alert('Participação de todos os convidados foi cancelada com sucesso.')
+    
+    // Redirect to main invitation page
+    navigateTo(`/${inviteCode.value}`)
+  } catch (err: any) {
+    console.error('Error cancelling all guests:', err)
+    alert('Erro ao cancelar participação. Tente novamente.')
+  } finally {
+    cancellingAll.value = false
   }
 }
 
@@ -635,193 +538,253 @@ onUnmounted(() => {
   }
 })
 
-useHead({
+// SEO
+useSeoMeta({
   title: `Evento - Maria Luiza 4 Anos`
 })
 </script>
 
 <style scoped>
-/* Responsive Icon System */
-.icon-responsive {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.icon-sm {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.icon-xs {
-  width: 1rem;
-  height: 1rem;
-}
-
-.icon-xl {
-  width: 3rem;
-  height: 3rem;
-}
-
-/* Responsive Text System */
-.btn-text {
-  display: inline;
-}
-
-.btn-text-mobile {
-  display: none;
-}
-
-.btn-text-desktop {
-  display: inline;
-}
-
-.address-line {
-  font-size: 0.9rem;
-  color: #CBD5E1;
-}
-
-.dress-text,
-.parking-text {
-  flex: 1;
-}
-
-/* Event Container */
 .event-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  padding: 2rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: var(--gradient-background);
+  padding: var(--space-lg);
+  padding-bottom: var(--space-6xl);
+  box-sizing: border-box;
 }
 
+@media (min-width: 640px) {
+  .event-container {
+    padding: var(--space-xl);
+    padding-bottom: var(--space-6xl);
+  }
+}
+
+/* Header Styles */
 .header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-4xl);
+  position: relative;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.title-section {
+  flex: 1;
+  text-align: center;
 }
 
 .title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 3rem;
+  font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 800;
-  margin: 0 0 1rem 0;
-  color: #F8FAFC;
-  text-shadow: 0 4px 20px #00000040;
-  letter-spacing: -1px;
+  color: var(--color-text-primary);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  line-height: 1.2;
 }
 
 .subtitle {
-  font-weight: 700;
-  margin: 0;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.2rem;
-  color: #CBD5E1;
-  text-shadow: 0 2px 10px #00000040;
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+  color: var(--color-text-secondary);
+  margin: var(--space-md) 0 0 0;
+  font-weight: 600;
 }
 
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+  
+  .title-section {
+    text-align: center;
+  }
+}
+
+/* Loading and Error States */
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: var(--space-3xl);
+  margin: var(--space-xl) auto;
+  max-width: 500px;
+}
+
+.loading-state p,
+.error-state p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.error-state h3 {
+  color: var(--color-text-primary);
+  font-size: var(--text-xl);
+}
+
+.error-icon {
+  color: var(--color-danger);
+  filter: drop-shadow(0 4px 12px rgba(255, 99, 71, 0.4));
+}
+
+/* Event Content Layout */
 .event-content {
   display: grid;
-  gap: 2rem;
+  gap: var(--space-2xl);
   width: 100%;
   max-width: 1200px;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  margin: 0 auto;
+  grid-template-columns: 1fr;
 }
 
-/* Card Styles */
-.guest-info-card,
-.countdown-card,
-.timeline-card,
-.photos-card,
-.location-card,
-.dress-card,
-.parking-card {
-  background: linear-gradient(145deg, #64748B20, #64748B15);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid #64748B30;
-  box-shadow: 0 25px 50px #00000020;
-  transition: all 0.3s ease;
+@media (min-width: 768px) {
+  .event-content {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
 }
 
-.guest-info-card {
-  grid-column: 1 / -1; /* Full width */
+/* Glass Cards */
+.glass-card {
+  background: var(--color-surface-elevated);
+  border: var(--border-glass);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  transition: var(--transition-base);
+  backdrop-filter: var(--glass-backdrop);
+  box-shadow: var(--shadow-lg);
 }
 
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: rgba(255, 105, 180, 0.4);
+}
+
+/* Card Headers */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.card-header h2 {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: #F8FAFC;
-  text-shadow: 0 2px 10px #00000040;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
 }
 
 .card-title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.5rem;
+  font-size: var(--text-xl);
   font-weight: 700;
-  margin: 0 0 1.5rem 0;
-  color: #F8FAFC;
-  text-shadow: 0 2px 10px #00000040;
+  color: var(--color-text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Responsive Titles */
+.mobile-title {
+  display: block;
+}
+
+.desktop-title {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-title {
+    display: none;
+  }
+  
+  .desktop-title {
+    display: block;
+  }
 }
 
 .reference-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  color: #F8FAFC;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.reference-code {
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
   font-weight: 600;
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-light));
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(147, 112, 219, 0.4);
 }
 
 .confirmed-badge {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  font-size: 0.75rem;
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-light));
+  color: var(--color-text-primary);
+  font-size: var(--text-xs);
   font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-lg);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px #10B98130;
+  border: 1px solid rgba(16, 185, 129, 0.4);
 }
 
-.category-badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+/* Countdown */
+.countdown-display {
+  text-align: center;
+  margin-top: var(--space-lg);
 }
 
-.category-badge.Amigos { background: #3B82F6; color: #FFFFFF; }
-.category-badge.Creche { background: #F59E0B; color: #FFFFFF; }
-.category-badge.Familia { background: #10B981; color: #FFFFFF; }
-.category-badge.Padrinhos { background: #8B5CF6; color: #FFFFFF; }
+.countdown-time {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+}
+
+.countdown-label {
+  color: var(--color-text-secondary);
+  margin-top: var(--space-sm);
+  font-size: var(--text-lg);
+}
 
 /* Guest List */
 .guests-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .guest-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #64748B15;
-  border-radius: 12px;
-  padding: 1rem;
-  border: 1px solid #64748B20;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: var(--transition-base);
+  gap: var(--space-md);
+}
+
+@media (min-width: 640px) {
+  .guest-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+}
+
+.guest-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 105, 180, 0.3);
 }
 
 .guest-info {
@@ -829,385 +792,389 @@ useHead({
 }
 
 .guest-name {
-  font-weight: 600;
-  color: #F8FAFC;
-  font-size: 1.1rem;
-  display: block;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-sm) 0;
 }
 
 .guest-details {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--space-xs);
 }
 
-.guest-email {
-  color: #94A3B8;
-  font-size: 0.9rem;
+.guest-details p {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: 0;
 }
-
-.kid-info {
-  background: #F59E0B;
-  color: #FFFFFF;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.dietary {
-  background: #EF4444;
-  color: #FFFFFF;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-badge {
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-badge.registered { background: #64748B; color: #FFFFFF; }
-.status-badge.confirmed { background: #10B981; color: #FFFFFF; }
-.status-badge.attended { background: #3B82F6; color: #FFFFFF; }
 
 .guest-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--space-sm);
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .guest-actions {
+    justify-content: flex-end;
+  }
+}
+
+/* Buttons */
+.edit-btn,
+.cancel-btn,
+.family-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+  font-size: var(--text-sm);
+  min-height: 36px;
+  border: 1px solid transparent;
+  text-align: center;
+}
+
+.family-action-btn {
+  flex: 1;
+  max-width: 150px;
+  padding: var(--space-md) var(--space-lg);
+  min-height: 44px;
 }
 
 .edit-btn,
-.cancel-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: none;
-  border: 2px solid;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0.6875rem 1rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  min-height: 2.875rem;
-  min-width: 8rem;
-  box-sizing: border-box;
+.family-action-btn.edit-btn {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-primary);
+  border-color: rgba(255, 105, 180, 0.3);
+  box-shadow: 0 2px 10px rgba(255, 105, 180, 0.2);
 }
 
-.edit-btn {
-  border-color: #3B82F6;
-  color: #3B82F6;
+.edit-btn:hover,
+.family-action-btn.edit-btn:hover {
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+  transform: translateY(-1px);
 }
 
-.edit-btn:hover {
-  background: #3B82F6;
-  color: #FFFFFF;
+.cancel-btn,
+.family-action-btn.cancel-btn {
+  background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-light));
+  color: var(--color-text-primary);
+  border-color: rgba(147, 112, 219, 0.4);
+  box-shadow: 0 4px 20px rgba(147, 112, 219, 0.3);
 }
 
-.cancel-btn {
-  border-color: #EF4444;
-  color: #EF4444;
+.cancel-btn:hover,
+.family-action-btn.cancel-btn:hover {
+  box-shadow: 0 8px 25px rgba(147, 112, 219, 0.5);
+  border-color: rgba(147, 112, 219, 0.6);
 }
 
-.cancel-btn:hover {
-  background: #EF4444;
-  color: #FFFFFF;
+/* Dark theme button text colors */
+[data-theme="dark"] .edit-btn,
+[data-theme="dark"] .cancel-btn,
+[data-theme="dark"] .family-action-btn {
+  color: #1A237E;
 }
 
-/* Family Actions */
 .family-actions {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #64748B30;
-  text-align: center;
-}
-
-.reject-family-btn {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #EF4444, #DC2626);
-  color: #FFFFFF;
-  border: 1px solid #F8717140;
-  padding: 0.875rem 1.5rem;
-  border-radius: 12px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  min-height: 2.75rem;
-}
-
-.reject-family-btn:hover {
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #EF444440;
-}
-
-/* Countdown */
-.countdown-display {
-  text-align: center;
-}
-
-.countdown-time {
-  font-family: 'Courier New', monospace;
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  text-shadow: 0 4px 20px #00000040;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
 }
 
 /* Timeline */
+.timeline-title {
+  margin-bottom: var(--space-2xl) !important;
+}
+
 .timeline {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-lg);
 }
 
 .timeline-item {
   display: flex;
-  gap: 1rem;
-  padding: 1rem;
-  background: #64748B10;
-  border-radius: 12px;
-  border-left: 4px solid #10B981;
+  gap: var(--space-lg);
+  align-items: flex-start;
 }
 
 .timeline-time {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-secondary);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-lg);
   font-weight: 700;
-  color: #10B981;
+  font-size: var(--text-sm);
   min-width: 60px;
-  font-family: 'Courier New', monospace;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 .timeline-content {
-  color: #E2E8F0;
+  color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
 .timeline-content strong {
-  color: #F8FAFC;
+  color: var(--color-text-primary);
 }
 
-/* Photo Sharing */
-.photo-sharing {
-  text-align: center;
-  color: #E2E8F0;
+/* Info Cards */
+.info-cards {
+  display: grid;
+  gap: var(--space-lg);
+  grid-column: 1 / -1;
 }
 
-.sharing-options {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2rem;
-  margin-top: 1rem;
+@media (min-width: 640px) {
+  .info-cards {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
 }
 
-.photo-link {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  text-decoration: none;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.photo-link:hover {
-  background: linear-gradient(135deg, #059669, #047857);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #10B98140;
-}
-
-.photo-description {
-  color: #E2E8F0;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-.qr-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.qr-link {
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
-
-.qr-link:hover .qr-code-image {
-  transform: scale(1.05);
-  box-shadow: 0 10px 25px #3B82F640;
-}
-
-.qr-code-image {
-  width: 120px;
-  height: 120px;
-  background: linear-gradient(145deg, #64748B20, #64748B15);
-  border: 2px solid #64748B40;
-  border-radius: 16px;
+.info-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-md) 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  gap: var(--space-sm);
 }
 
-.qr-placeholder {
-  text-align: center;
-  color: #94A3B8;
-  font-size: 0.8rem;
-  line-height: 1.3;
-}
-
-.qr-placeholder strong {
-  color: #F8FAFC;
-  font-size: 0.9rem;
-}
-
-.qr-instruction {
-  color: #94A3B8;
-  font-size: 0.8rem;
-  text-align: center;
+.info-content {
+  color: var(--color-text-secondary);
+  line-height: 1.5;
   margin: 0;
 }
 
-/* Gifts Section */
-.gifts-card {
-  background: linear-gradient(145deg, #64748B20, #64748B15);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid #64748B30;
-  box-shadow: 0 25px 50px #00000020;
-  margin-bottom: 2rem;
+/* Location Card Styles */
+.location-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  align-items: center;
 }
 
-.gifts-info {
-  text-align: center;
+.location-logo {
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
 
-.gifts-info p {
-  color: #E2E8F0;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+.logo-instagram-link {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  border-radius: 50%;
+  overflow: hidden;
+  transition: var(--transition-base);
 }
 
-.gifts-link {
-  display: inline-flex;
+.logo-instagram-link:hover {
+  transform: scale(1.05);
+}
+
+.quintal-logo {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: var(--transition-base);
+  display: block;
+}
+
+.instagram-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(135deg, #F59E0B, #D97706);
-  color: #FFFFFF;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-weight: 600;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  white-space: nowrap;
-  min-height: 2.75rem;
+  border-radius: 50%;
+  opacity: 0;
+  transition: var(--transition-base);
+  color: white;
 }
 
-.gifts-link:hover {
-  background: linear-gradient(135deg, #D97706, #B45309);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #F59E0B40;
+.logo-instagram-link:hover .instagram-overlay {
+  opacity: 1;
 }
 
-/* Location */
-.location-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+.logo-instagram-link:hover .quintal-logo {
+  transform: scale(1.1);
 }
 
-.venue-details {
-  color: #E2E8F0;
-  line-height: 1.6;
+.location-details {
+  text-align: center;
+  width: 100%;
 }
 
-.venue-details strong {
-  color: #F8FAFC;
-  font-size: 1.1rem;
-}
-
-.map-link {
-  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-  color: #FFFFFF;
-  text-decoration: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.map-link:hover {
-  background: linear-gradient(135deg, #2563EB, #1E40AF);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px #3B82F640;
-}
-
-/* Dress Code */
-.dress-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.dress-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #E2E8F0;
-  line-height: 1.5;
-}
-
-.dress-icon {
-  font-size: 1.5rem;
-  min-width: 2rem;
-}
-
-/* Parking */
 .parking-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.parking-item {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: var(--space-md) 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  color: #E2E8F0;
-  line-height: 1.5;
+  justify-content: center;
+  gap: var(--space-xs);
 }
 
 .parking-icon {
-  font-size: 1.5rem;
-  min-width: 2rem;
+  color: var(--color-secondary);
+}
+
+.instagram-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
+  background: rgba(255, 105, 180, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.2);
+}
+
+.instagram-link:hover {
+  background: rgba(255, 105, 180, 0.2);
+  border-color: rgba(255, 105, 180, 0.4);
+  transform: translateY(-1px);
+  color: var(--color-primary);
+}
+
+.parking-info {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  margin: var(--space-md) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+}
+
+.parking-icon {
+  color: var(--color-secondary);
+}
+
+.map-container {
+  margin: var(--space-lg) 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.map-container iframe {
+  width: 100%;
+  display: block;
+}
+
+.location-actions {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.directions-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
+  background: rgba(255, 105, 180, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.2);
+}
+
+.directions-link:hover {
+  background: rgba(255, 105, 180, 0.2);
+  border-color: rgba(255, 105, 180, 0.4);
+  transform: translateY(-1px);
+  color: var(--color-primary);
+}
+
+.directions-icon {
+  color: var(--color-primary);
+}
+
+.external-icon {
+  color: var(--color-text-secondary);
+}
+
+@media (min-width: 480px) {
+  .location-content {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .location-details {
+    text-align: left;
+    flex: 1;
+  }
+  
+  .parking-info {
+    justify-content: flex-start;
+  }
+  
+  .location-actions {
+    justify-content: flex-start;
+  }
+}
+
+.gifts-btn {
+  background: linear-gradient(135deg, rgba(252, 123, 3, 1 ), rgb(237, 162, 91));
+  color: var(--color-text-primary);
+  border: 1px solid rgba(252, 123, 3, 0.4);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 200;
+  cursor: pointer;
+  transition: var(--transition-base);
+  font-size: var(--text-ss);
+  margin-top: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.gifts-btn:hover {
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--color-text-secondary);
+}
+
+.empty-icon {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
 }
 
 /* Modal Styles */
@@ -1217,552 +1184,164 @@ useHead({
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: var(--space-lg);
+  box-sizing: border-box;
 }
 
 .modal-content {
-  background: linear-gradient(145deg, #1E293B, #334155);
-  border-radius: 20px;
-  border: 1px solid #64748B30;
-  box-shadow: 0 25px 50px #00000040;
-  width: 95%;
-  max-width: 600px;
-  max-height: 85vh;
-  overflow: auto;
+  background: var(--color-surface-elevated);
+  border-radius: var(--radius-xl);
+  border: var(--border-glass);
+  backdrop-filter: var(--glass-backdrop);
+  box-shadow: var(--shadow-2xl);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #64748B30;
+  padding: var(--space-xl);
+  border-bottom: var(--border-glass);
 }
 
 .modal-header h3 {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
+  color: var(--color-text-primary);
   margin: 0;
-  color: #F8FAFC;
+  font-size: var(--text-xl);
 }
 
 .close-btn {
   background: none;
   border: none;
-  font-size: 2rem;
-  color: #94A3B8;
+  color: var(--color-text-secondary);
+  font-size: var(--text-2xl);
   cursor: pointer;
-  padding: 0;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s ease;
+  padding: var(--space-xs);
+  line-height: 1;
 }
 
 .close-btn:hover {
-  background: #64748B30;
-  color: #F8FAFC;
+  color: var(--color-text-primary);
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: var(--space-xl);
 }
 
-.form-group {
-  margin-bottom: 1rem;
+.modal-body .text-sm {
+  font-size: var(--text-sm);
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #E2E8F0;
-  font-weight: 600;
-}
-
-.form-input,
-.form-textarea,
-.form-select {
-  width: 100%;
-  box-sizing: border-box;
-  background: #64748B15;
-  border: 1px solid #64748B40;
-  border-radius: 8px;
-  padding: 0.75rem;
-  color: #F8FAFC;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-}
-
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
-  outline: none;
-  border-color: #3B82F6;
-  box-shadow: 0 0 0 3px #3B82F620;
-}
-
-.kid-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.kid-fields .form-group {
-  margin-bottom: 0;
-}
-
-@media (max-width: 480px) {
-  .kid-fields {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-  
-  .modal-content {
-    width: 98%;
-    margin: 1rem auto;
-  }
-  
-  .modal-header,
-  .modal-body,
-  .modal-actions {
-    padding: 1rem;
-  }
+.modal-body .text-secondary {
+  color: var(--color-text-secondary);
+  margin-top: var(--space-sm);
 }
 
 .modal-actions {
   display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid #64748B30;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  border-top: var(--border-glass);
   justify-content: flex-end;
 }
 
-.cancel-btn {
-  background: none;
-  border: 2px solid #EF4444;
-  color: #EF4444;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+@media (max-width: 480px) {
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
+.save-btn,
+.confirm-btn {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 105, 180, 0.4);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
+}
+
+.save-btn:hover,
+.confirm-btn:hover {
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+}
+
+.save-btn:disabled,
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: rgba(100, 116, 139, 0.3);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
 }
 
 .cancel-btn:hover {
-  background: #EF4444;
-  color: #FFFFFF;
+  background: rgba(100, 116, 139, 0.5);
+  color: var(--color-text-primary);
 }
 
-.save-btn {
-  background: linear-gradient(135deg, #10B981, #059669);
-  color: #FFFFFF;
-  border: 1px solid #34D39940;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+/* Dark theme modal button text colors */
+[data-theme="dark"] .save-btn,
+[data-theme="dark"] .confirm-btn {
+  color: #1A237E;
+}
+
+/* Animations */
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid transparent;
+  border-top: 3px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button Primary */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 105, 180, 0.4);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
 }
 
-.save-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #059669, #047857);
+.btn-primary:hover {
+  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+  transform: translateY(-1px);
 }
 
-.save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.delete-btn {
-  background: linear-gradient(135deg, #EF4444, #DC2626);
-  color: #FFFFFF;
-  border: 1px solid #F8717140;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.delete-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
-}
-
-.delete-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Loading and Error States */
-.loading,
-.error {
-  text-align: center;
-  padding: 3rem;
-  color: #94A3B8;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.1rem;
-  background: linear-gradient(145deg, #64748B20, #64748B15);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid #64748B30;
-  box-shadow: 0 25px 50px #00000020;
-  width: 100%;
-  max-width: 800px;
-}
-
-.error {
-  color: #F87171;
-  border-color: #EF444460;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .event-container {
-    padding: 1rem 0.5rem;
-  }
-  
-  .title {
-    font-size: 2rem;
-  }
-  
-  .event-content {
-    grid-template-columns: 1fr;
-  }
-  
-  .guest-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-  }
-  
-  .guest-actions {
-    justify-content: center;
-  }
-  
-  .sharing-options {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .location-info {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .countdown-time {
-    font-size: 1.8rem;
-  }
-  
-  .kid-fields {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .title {
-    font-size: 1.8rem;
-  }
-  
-  .guest-info-card,
-  .countdown-card,
-  .timeline-card,
-  .photos-card,
-  .location-card,
-  .dress-card,
-  .parking-card {
-    padding: 1rem;
-  }
-  
-  .timeline-item {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .timeline-time {
-    min-width: auto;
-  }
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .event-container {
-    padding: 1rem 0.5rem;
-  }
-  
-  .title {
-    font-size: 2rem;
-  }
-  
-  /* Responsive Icons */
-  .icon-responsive {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-  
-  .icon-sm {
-    width: 1rem;
-    height: 1rem;
-  }
-  
-  .icon-xs {
-    width: 0.875rem;
-    height: 0.875rem;
-  }
-  
-  .icon-xl {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-  
-  /* Responsive Text */
-  .btn-text {
-    display: none;
-  }
-  
-  .btn-text-mobile {
-    display: inline;
-  }
-  
-  .btn-text-desktop {
-    display: none;
-  }
-  
-  /* Card Layouts */
-  .guest-info-card,
-  .countdown-card,
-  .timeline-card,
-  .photos-card,
-  .gifts-card,
-  .location-card,
-  .dress-card,
-  .parking-card {
-    padding: 1.25rem;
-  }
-  
-  /* Mobile Guest Layout */
-  .guest-item {
-    flex-direction: row;
-    align-items: flex-start;
-    padding: 1rem;
-  }
-  
-  .guest-info {
-    flex: 1;
-    margin-right: 1rem;
-  }
-  
-  .guest-name {
-    margin-bottom: 0.25rem;
-  }
-  
-  .guest-details {
-    flex-direction: column;
-    gap: 0.25rem;
-    align-items: flex-start;
-  }
-  
-  .guest-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-self: flex-start;
-    margin-top: 0.25rem;
-  }
-  
-  .edit-btn,
-  .cancel-btn {
-    font-size: 0.8rem;
-    padding: 0.5rem 0.75rem;
-    min-height: 2rem;
-    min-width: 5rem;
-  }
-  
-  /* Timeline */
-  .timeline-item {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
-  
-  .timeline-time {
-    min-width: auto;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-  }
-  
-  .timeline-content {
-    font-size: 0.9rem;
-  }
-  
-  /* Dress and Parking Items */
-  .dress-item,
-  .parking-item {
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-  
-  .dress-icon,
-  .parking-icon {
-    font-size: 1rem;
-    min-width: 1.5rem;
-  }
-  
-  .dress-text,
-  .parking-text {
-    font-size: 0.9rem;
-    line-height: 1.4;
-  }
-  
-  /* Photo QR Section */
-  .qr-placeholder {
-    padding: 1rem;
-  }
-  
-  .qr-instruction {
-    font-size: 0.85rem;
-  }
-  
-  /* Address */
-  .address-line {
-    font-size: 0.85rem;
-  }
-  
-  /* Buttons */
-  .reject-family-btn,
-  .gifts-link {
-    font-size: 0.85rem;
-    padding: 0.75rem 1rem;
-    min-height: 2.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .title {
-    font-size: 1.8rem;
-  }
-  
-  /* Extra small icons */
-  .icon-responsive {
-    width: 1rem;
-    height: 1rem;
-  }
-  
-  .icon-sm {
-    width: 0.875rem;
-    height: 0.875rem;
-  }
-  
-  .icon-xs {
-    width: 0.75rem;
-    height: 0.75rem;
-  }
-  
-  .icon-xl {
-    width: 2rem;
-    height: 2rem;
-  }
-  
-  /* Extra compact cards */
-  .guest-info-card,
-  .countdown-card,
-  .timeline-card,
-  .photos-card,
-  .gifts-card,
-  .location-card,
-  .dress-card,
-  .parking-card {
-    padding: 1rem;
-  }
-  
-  .card-title {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  
-  .card-header h2 {
-    font-size: 1.25rem;
-  }
-  
-  /* Compact timeline */
-  .timeline-time {
-    font-size: 0.8rem;
-  }
-  
-  .timeline-content {
-    font-size: 0.85rem;
-  }
-  
-  /* Extra compact buttons */
-  .edit-btn,
-  .cancel-btn {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.625rem;
-    min-height: 1.75rem;
-  }
-  
-  .reject-family-btn,
-  .gifts-link {
-    font-size: 0.8rem;
-    padding: 0.625rem 0.875rem;
-    min-height: 2.25rem;
-  }
-  
-  /* Compact text */
-  .dress-text,
-  .parking-text {
-    font-size: 0.85rem;
-  }
-  
-  .dress-icon,
-  .parking-icon {
-    font-size: 0.9rem;
-    min-width: 1.25rem;
-  }
-  
-  .address-line {
-    font-size: 0.8rem;
-  }
-}
-
-.creator-reference {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  border-top: 1px solid #64748B30;
-  text-align: center;
-  background: linear-gradient(145deg, #64748B20, #64748B15);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid #64748B30;
-}
-
-.creator-reference p {
-  font-size: 0.8rem;
-  color: #94A3B8;
-  margin: 0;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-}
-
-.creator-reference a {
-  color: #60A5FA;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.creator-reference a:hover {
-  color: #3B82F6;
-  text-decoration: underline;
+[data-theme="dark"] .btn-primary {
+  color: #1A237E;
 }
 </style>

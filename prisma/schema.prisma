@@ -16,8 +16,10 @@ datasource db {
 /////////////////  ENUM GOES HERE  //////////////////
 enum Status {
   REGISTERED
+  PENDING
   CONFIRMED
   ATTENDED
+  CANCELLED
 }
 
 enum Category {
@@ -45,9 +47,27 @@ model Guest {
   kidAge        Int?
   maleKid       Boolean?  @default(false)
   referenceCode String
-  cancelledAt   DateTime?
   surveyRatingId Int?      // FK to future Rating table
+  
+  // Relations
+  statusLogs    GuestStatusLog[]
   
   @@index([inviteCode])
   @@index([referenceCode])
+}
+
+// Guest status change log for audit trail
+model GuestStatusLog {
+  id          String   @id @default(cuid())
+  guestId     String
+  fromStatus  Status?  // null for initial status
+  toStatus    Status
+  changedAt   DateTime @default(now())
+  reason      String?  // Optional reason for status change
+  
+  // Relations
+  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  
+  @@index([guestId])
+  @@index([changedAt])
 }
