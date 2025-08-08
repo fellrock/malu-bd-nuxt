@@ -65,23 +65,37 @@
                     :checked="!!guest.kidAge"
                     @change="toggleKidFields(guest, $event)"
                   />
-                  Criança
+                  <CakeIcon class="kid-checkbox-icon" />
+                  <span>Criança</span>
                 </label>
 
                 <div v-if="guest.kidAge !== null && guest.kidAge !== undefined" class="kid-fields">
-                  <input 
-                    v-model.number="guest.kidAge" 
-                    type="number" 
-                    placeholder="Idade da criança"
-                    min="0" 
-                    max="18"
-                    class="kid-input"
-                  />
-                  <select v-model="guest.maleKid" class="kid-select">
-                    <option value="">Sexo da criança</option>
-                    <option :value="true">Menino</option>
-                    <option :value="false">Menina</option>
-                  </select>
+                  <div class="kid-field-group">
+                    <div class="kid-field-label">
+                      <CakeIcon class="kid-field-icon" />
+                      <span>Idade</span>
+                    </div>
+                    <input 
+                      v-model.number="guest.kidAge" 
+                      type="number" 
+                      placeholder="Idade da criança"
+                      min="0" 
+                      max="18"
+                      class="kid-input"
+                    />
+                  </div>
+                  
+                  <div class="kid-field-group">
+                    <div class="kid-field-label">
+                      <UserIcon class="kid-field-icon" />
+                      <span>Sexo</span>
+                    </div>
+                    <select v-model="guest.maleKid" class="kid-select">
+                      <option value="">Selecione...</option>
+                      <option :value="true">👦 Menino</option>
+                      <option :value="false">👧 Menina</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -222,7 +236,7 @@
     </div>
     
     <!-- Creator Reference -->
-    <div class="creator-reference">
+    <div class="creator-reference mt-4xl animate-fadeInUp stagger-6">
       <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
     </div>
   </div>
@@ -237,7 +251,9 @@ import {
   TrashIcon,
   PlusIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  CakeIcon,
+  UserIcon
 } from '@heroicons/vue/24/solid'
 
 // Define page meta for middleware - STRICT: Only PENDING guests allowed
@@ -744,9 +760,7 @@ useHead({
 }
 
 .field-input,
-.field-textarea,
-.kid-input,
-.kid-select {
+.field-textarea {
   background: var(--color-surface);
   border: var(--border-glass);
   border-radius: var(--radius-lg);
@@ -758,20 +772,68 @@ useHead({
   backdrop-filter: var(--glass-backdrop);
 }
 
+.kid-input,
+.kid-select {
+  background: var(--color-surface-elevated);
+  border: 2px solid rgba(147, 112, 219, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-primary);
+  font-size: var(--text-base);
+  transition: var(--transition-base);
+  backdrop-filter: var(--glass-backdrop);
+}
+
+.kid-select {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  border: 2px solid rgba(147, 112, 219, 0.4);
+}
+
+[data-theme="dark"] .kid-select {
+  background: rgba(31, 41, 55, 0.95);
+  color: #f9fafb;
+  border: 2px solid rgba(147, 112, 219, 0.5);
+}
+
+.kid-select option {
+  background: rgba(255, 255, 255, 0.98);
+  color: #1f2937;
+  padding: var(--space-md);
+  font-size: var(--text-base);
+}
+
+[data-theme="dark"] .kid-select option {
+  background: rgba(31, 41, 55, 0.98);
+  color: #f9fafb;
+}
+
 .field-input::placeholder,
-.field-textarea::placeholder,
-.kid-input::placeholder {
+.field-textarea::placeholder {
   color: var(--color-text-tertiary);
 }
 
+.kid-input::placeholder {
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
 .field-input:focus,
-.field-textarea:focus,
-.kid-input:focus,
-.kid-select:focus {
+.field-textarea:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.3);
   background: var(--color-surface-elevated);
+}
+
+.kid-input:focus,
+.kid-select:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(147, 112, 219, 0.3);
+  background: var(--color-surface);
 }
 
 .field-textarea {
@@ -792,6 +854,16 @@ useHead({
   color: var(--color-text-primary);
   font-weight: 500;
   cursor: pointer;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 105, 180, 0.1);
+  border: 1px solid rgba(255, 105, 180, 0.2);
+  transition: var(--transition-base);
+}
+
+.checkbox-label:hover {
+  background: rgba(255, 105, 180, 0.15);
+  border-color: rgba(255, 105, 180, 0.3);
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -800,10 +872,43 @@ useHead({
   accent-color: var(--color-primary);
 }
 
+.kid-checkbox-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-primary);
+}
+
 .kid-fields {
   display: grid;
-  gap: var(--space-md);
-  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  grid-template-columns: 1fr;
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  background: rgba(147, 112, 219, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(147, 112, 219, 0.2);
+}
+
+.kid-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.kid-field-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  padding-bottom: var(--space-xs);
+}
+
+.kid-field-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-secondary);
 }
 
 .remove-btn {

@@ -170,11 +170,7 @@
           </div>
           <div class="form-group">
             <label for="addReferenceCode">Código de Referência *</label>
-            <input v-model="newGuest.referenceCode" @input="updateInviteCodePreview" id="addReferenceCode" type="text" class="form-input" required />
-          </div>
-          <div class="form-group">
-            <label for="addInviteCode">Código do Convite (automático por família)</label>
-            <input v-model="newGuest.inviteCode" id="addInviteCode" type="text" class="form-input" readonly placeholder="Código compartilhado por família" />
+            <input v-model="newGuest.referenceCode" id="addReferenceCode" type="text" class="form-input" required />
           </div>
           
           <!-- Kid information section -->
@@ -298,6 +294,52 @@
         </div>
       </div>
     </div>
+
+    <!-- Success Modal -->
+    <div v-if="showSuccessModal" class="modal-overlay">
+      <div class="modal-content success-modal" @click.stop>
+        <div class="modal-header">
+          <h3>✅ Convidado Adicionado com Sucesso!</h3>
+          <button @click="showSuccessModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="success-content">
+            <p class="success-message">
+              <strong>{{ newGuestName }}</strong> foi adicionado à lista de convidados da família <strong>{{ newGuestReferenceCode }}</strong>.
+            </p>
+            
+            <div class="share-section">
+              <label class="share-label">🔗 Link Compartilhável:</label>
+              <div class="link-container">
+                <input 
+                  :value="shareableLink" 
+                  readonly 
+                  class="share-link-input"
+                  ref="linkInput"
+                />
+                <button @click="copyToClipboard" class="copy-btn" :class="{ 'copied': linkCopied }">
+                  {{ linkCopied ? '✅ Copiado!' : '📋 Copiar' }}
+                </button>
+              </div>
+              <p class="share-hint">
+                Envie este link para a família acessar o convite da festa.
+              </p>
+            </div>
+            
+            <div class="invite-info">
+              <p><strong>Código do Convite:</strong> <span class="invite-code-display">{{ generatedInviteCode }}</span></p>
+              <p><strong>Família:</strong> {{ newGuestReferenceCode }}</p>
+              <p><strong>Categoria:</strong> {{ newGuestCategory }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="showSuccessModal = false" class="success-btn">
+            🎉 Concluir
+          </button>
+        </div>
+      </div>
+    </div>
     
     <!-- Creator Reference -->
     <div class="creator-reference">
@@ -317,10 +359,20 @@ const expandedGroups = ref<string[]>([])
 const showImportModal = ref(false)
 const showAddGuestModal = ref(false)
 const showEditGuestModal = ref(false)
+const showSuccessModal = ref(false)
 const selectedFile = ref<File | null>(null)
 const importing = ref(false)
 const fileInput = ref<HTMLInputElement>()
+const linkInput = ref<HTMLInputElement>()
 const editingGuest = ref<any>(null)
+
+// Success modal data
+const newGuestName = ref('')
+const newGuestReferenceCode = ref('')
+const newGuestCategory = ref('')
+const generatedInviteCode = ref('')
+const shareableLink = ref('')
+const linkCopied = ref(false)
 
 // Function to open add guest modal and generate preview code
 const openAddGuestModal = () => {
@@ -333,7 +385,6 @@ const newGuest = ref({
   email: '',
   category: 'Familia',
   referenceCode: '',
-  inviteCode: '',
   isKid: false,
   kidAge: null,
   maleKid: false,
@@ -441,16 +492,12 @@ async function addGuest() {
   try {
     loading.value = true
     
-    // Always generate a new invite code
-    const generatedCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-    
     // Prepare guest data - only include kid fields if hasKid is true
     const guestData: any = {
       name: newGuest.value.name,
       email: newGuest.value.email,
       category: newGuest.value.category,
       referenceCode: newGuest.value.referenceCode,
-      inviteCode: generatedCode,
       dietary: newGuest.value.dietary,
       notes: newGuest.value.notes,
       status: 'REGISTERED'
@@ -468,7 +515,17 @@ async function addGuest() {
     })
     
     if (res.success) {
+      // Store data for success modal - get invite code from response
+      newGuestName.value = newGuest.value.name
+      newGuestReferenceCode.value = newGuest.value.referenceCode
+      newGuestCategory.value = newGuest.value.category
+      generatedInviteCode.value = res.guest.inviteCode
+      shareableLink.value = `https://malu-bd-nuxt.vercel.app/${res.guest.inviteCode}`
+      
+      // Close add modal and show success modal
       showAddGuestModal.value = false
+      showSuccessModal.value = true
+      
       resetNewGuest()
       await fetchGuests()
     }
@@ -476,6 +533,30 @@ async function addGuest() {
     console.error('Error adding guest:', err)
   } finally {
     loading.value = false
+  }
+}
+
+// Copy shareable link to clipboard
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(shareableLink.value)
+    linkCopied.value = true
+    
+    // Reset the copied state after 2 seconds
+    setTimeout(() => {
+      linkCopied.value = false
+    }, 2000)
+  } catch (err) {
+    // Fallback for older browsers
+    if (linkInput.value) {
+      linkInput.value.select()
+      document.execCommand('copy')
+      linkCopied.value = true
+      
+      setTimeout(() => {
+        linkCopied.value = false
+      }, 2000)
+    }
   }
 }
 
@@ -520,36 +601,16 @@ async function updateGuest() {
 }
 
 function resetNewGuest() {
-  const previewCode = Math.random().toString(36).substring(2, 8).toUpperCase()
   newGuest.value = {
     name: '',
     email: '',
     category: 'Familia',
     referenceCode: '',
-    inviteCode: previewCode, // Show preview of what will be generated
     isKid: false,
     kidAge: null,
     maleKid: false,
     dietary: '',
     notes: ''
-  }
-}
-
-// Function to update invite code preview when reference code changes
-const updateInviteCodePreview = () => {
-  if (newGuest.value.referenceCode) {
-    // Look for existing guest with same reference code
-    const existingGroup = groupedGuests.value.find(group => 
-      group.referenceCode === newGuest.value.referenceCode
-    )
-    
-    if (existingGroup) {
-      // Reuse existing invite code
-      newGuest.value.inviteCode = existingGroup.inviteCode
-    } else {
-      // Generate new preview code
-      newGuest.value.inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-    }
   }
 }
 
@@ -1039,6 +1100,30 @@ useHead({
   text-overflow: ellipsis;
 }
 
+.form-select {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.form-select option {
+  background: white;
+  color: #1f2937;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+[data-theme="dark"] .form-select {
+  background: rgba(31, 41, 55, 0.95);
+  color: #f9fafb;
+  border: 2px solid rgba(59, 130, 246, 0.4);
+}
+
+[data-theme="dark"] .form-select option {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
 .form-input:focus,
 .form-textarea:focus,
 .form-select:focus {
@@ -1294,6 +1379,137 @@ useHead({
   .kid-section {
     padding: 0.5rem;
   }
+}
+
+/* Success Modal Styles */
+.success-modal {
+  border: 2px solid #10B981;
+  box-shadow: 0 25px 50px #10B98140;
+}
+
+.success-content {
+  text-align: center;
+}
+
+.success-message {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  color: #E2E8F0;
+  line-height: 1.6;
+}
+
+.share-section {
+  background: #10B98110;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid #10B98120;
+}
+
+.share-label {
+  display: block;
+  margin-bottom: 1rem;
+  color: #10B981;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.link-container {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.share-link-input {
+  flex: 1;
+  background: #64748B15;
+  border: 1px solid #10B98140;
+  border-radius: 8px;
+  padding: 0.75rem;
+  color: #F8FAFC;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.copy-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.copy-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px #10B98130;
+}
+
+.copy-btn.copied {
+  background: linear-gradient(135deg, #059669, #047857);
+  animation: pulse-green 0.5s ease-in-out;
+}
+
+@keyframes pulse-green {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.share-hint {
+  font-size: 0.9rem;
+  color: #94A3B8;
+  margin: 0;
+  font-style: italic;
+}
+
+.invite-info {
+  background: #3B82F610;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid #3B82F620;
+  text-align: left;
+}
+
+.invite-info p {
+  margin: 0.5rem 0;
+  color: #E2E8F0;
+  font-size: 0.95rem;
+}
+
+.invite-code-display {
+  font-family: 'Courier New', monospace;
+  background: #3B82F620;
+  color: #3B82F6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.success-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #FFFFFF;
+  border: 1px solid #10B98140;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.success-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px #10B98140;
 }
 
 .creator-reference {
