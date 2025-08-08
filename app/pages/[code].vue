@@ -114,9 +114,7 @@
     />
 
     <!-- Creator Reference -->
-    <div class="creator-reference mt-4xl animate-fadeInUp stagger-6">
-      <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
-    </div>
+    <CreatorReference />
   </div>
 </template>
 
@@ -149,7 +147,7 @@ definePageMeta({
         currentStatus = 'PENDING'
       }
 
-      // Strict routing: Main page ONLY for REGISTERED and CANCELLED
+      // Strict routing: Main page ONLY for REGISTERED
       if (currentStatus === 'PENDING') {
         return navigateTo(`/convite/${inviteCode}`, { replace: true })
       }
@@ -157,8 +155,12 @@ definePageMeta({
       if (currentStatus === 'CONFIRMED') {
         return navigateTo(`/evento/${inviteCode}`, { replace: true })
       }
+      
+      if (currentStatus === 'CANCELLED') {
+        return navigateTo('/cancelado', { replace: true })
+      }
 
-      // Allow REGISTERED and CANCELLED to stay on main page
+      // Allow REGISTERED to stay on main page
       
     } catch (error: any) {
       console.error('Middleware error:', error)

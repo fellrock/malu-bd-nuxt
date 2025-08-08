@@ -342,9 +342,7 @@
     </div>
     
     <!-- Creator Reference -->
-    <div class="creator-reference">
-      <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
-    </div>
+    <CreatorReference containerClass="on-light-bg" />
   </div>
 </template>
 
@@ -1510,35 +1508,5 @@ useHead({
   background: linear-gradient(135deg, #059669, #047857);
   transform: translateY(-1px);
   box-shadow: 0 10px 25px #10B98140;
-}
-
-.creator-reference {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  border-top: 1px solid #64748B30;
-  text-align: center;
-  background: linear-gradient(145deg, #64748B20, #64748B15);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid #64748B30;
-}
-
-.creator-reference p {
-  font-size: 0.8rem;
-  color: #94A3B8;
-  margin: 0;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-}
-
-.creator-reference a {
-  color: #60A5FA;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.creator-reference a:hover {
-  color: #3B82F6;
-  text-decoration: underline;
 }
 </style>

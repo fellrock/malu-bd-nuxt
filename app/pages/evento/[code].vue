@@ -344,9 +344,7 @@
     </div>
 
     <!-- Creator Reference -->
-    <div class="creator-reference mt-4xl animate-fadeInUp stagger-6">
-      <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
-    </div>
+    <CreatorReference containerClass="on-colored-bg" extraSpacing="medium" />
   </div>
 </template>
 
@@ -386,9 +384,9 @@ definePageMeta({
         if (res.success && res.guests.length > 0) {
           const statuses = res.guests.map((guest: any) => guest.status)
           
-          // If all guests are CANCELLED, redirect to main page
+          // If all guests are CANCELLED, redirect to cancellation page
           if (statuses.every((s: string) => s === 'CANCELLED')) {
-            return navigateTo(`/${inviteCode}`, { replace: true })
+            return navigateTo('/cancelado', { replace: true })
           }
           
           // If guests are still PENDING, redirect to invitation page
@@ -1693,31 +1691,5 @@ useSeoMeta({
 
 [data-theme="dark"] .btn-primary {
   color: #1A237E;
-}
-
-/* Creator Reference Footer */
-.creator-reference {
-  padding: var(--space-xl) 0 var(--space-md) 0;
-  border-top: var(--border-subtle, 1px solid rgba(255,255,255,0.15));
-  text-align: center;
-  opacity: 0.85;
-}
-
-.creator-reference p {
-  font-size: var(--text-sm);
-  color: var(--color-text-tertiary, rgba(255,255,255,0.7));
-  margin: 0;
-}
-
-.creator-reference a {
-  color: var(--color-primary);
-  text-decoration: none;
-  font-weight: 600;
-  transition: var(--transition-base);
-}
-
-.creator-reference a:hover {
-  color: var(--color-primary-light);
-  text-decoration: underline;
 }
 </style>

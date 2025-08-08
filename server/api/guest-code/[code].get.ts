@@ -20,11 +20,10 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Find all guests with this invite code (group)
+    // Find all guests with this invite code (group) - including cancelled ones
     const guests = await prisma.guest.findMany({
       where: {
-        inviteCode: inviteCode.toUpperCase(),
-        status: { not: 'CANCELLED' as any } // Only non-cancelled guests
+        inviteCode: inviteCode.toUpperCase()
       },
       select: {
         id: true,
