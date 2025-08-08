@@ -1,4 +1,5 @@
 import { prisma } from '../utils/prisma'
+import * as XLSX from 'xlsx'
 
 export default defineEventHandler(async (event) => {
   // Only allow GET requests
@@ -36,46 +37,31 @@ export default defineEventHandler(async (event) => {
       ]
     })
 
-    // Convert to CSV format
-    const headers = [
-      'id',
-      'name',
-      'email',
-      'inviteCode',
-      'status',
-      'category',
-      'referenceCode',
-      'dietary',
-      'kidAge',
-      'maleKid',
-      'notes',
-      'createdAt',
-      'updatedAt'
-    ]
+    // Build Excel workbook
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(guests)
+    XLSX.utils.book_append_sheet(wb, ws, 'Guests')
+    const buffer = XLSX.write(wb, {
+      bookType: 'xlsx',
+      type: 'buffer',
+      codepage: 28591
+    })
 
-    const csvRows = [
-      headers.join(','), // Header row
-      ...guests.map(guest => 
-        headers.map(header => {
-          const value = guest[header as keyof typeof guest]
-          if (value === null || value === undefined) return ''
-          if (typeof value === 'string' && value.includes(',')) {
-            return `"${value.replace(/"/g, '""')}"`
-          }
-          return value
-        }).join(',')
-      )
-    ]
-
-    const csvContent = csvRows.join('\n')
-    
     // Set headers for file download with datetime including hours, minutes, and seconds
     const now = new Date()
     const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19) // YYYY-MM-DDTHH-MM-SS format
-    setHeader(event, 'Content-Type', 'text/csv')
-    setHeader(event, 'Content-Disposition', `attachment; filename="convidados-${timestamp}.csv"`)
-    
-    return csvContent
+    setHeader(
+      event,
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    setHeader(
+      event,
+      'Content-Disposition',
+      `attachment; filename="convidados-${timestamp}.xlsx"`
+    )
+
+    return buffer
 
   } catch (error: any) {
     console.error('Export error:', error)

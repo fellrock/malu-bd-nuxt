@@ -25,7 +25,7 @@
         ➕ Adicionar Convidado
       </button>
       <button @click="showImportModal = true" class="action-btn import-btn">
-        📋 Importar CSV
+        📋 Importar Excel
       </button>
       <button @click="exportData" class="action-btn export-btn" :disabled="loading">
         📊 Exportar Dados
@@ -103,14 +103,14 @@
     <div v-if="showImportModal" class="modal-overlay">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Importar Convidados via CSV</h3>
+          <h3>Importar Convidados via Excel</h3>
           <button @click="showImportModal = false" class="close-btn">×</button>
         </div>
         <div class="modal-body">
           <div class="import-instructions">
-            <p><strong>📋 Importação de Convidados via CSV</strong></p>
-            <p>Selecione um arquivo CSV (.csv) com as seguintes colunas obrigatórias:</p>
-            <ul class="csv-columns">
+            <p><strong>📋 Importação de Convidados via Excel</strong></p>
+            <p>Selecione um arquivo Excel (.xlsx) com as seguintes colunas obrigatórias:</p>
+            <ul class="excel-columns">
               <li><code>name</code> - Nome do convidado (obrigatório)</li>
               <li><code>category</code> - Categoria: Amigos, Creche, Familia, ou Padrinhos (obrigatório)</li>
               <li><code>referenceCode</code> - Código de referência da família (obrigatório)</li>
@@ -122,22 +122,22 @@
             </ul>
             
             <div class="template-section">
-              <p><strong>💡 Dica:</strong> Baixe o modelo CSV para facilitar a importação:</p>
-              <button @click="downloadCSVTemplate" class="template-btn">
-                📥 Baixar Modelo CSV
+              <p><strong>💡 Dica:</strong> Baixe o modelo Excel para facilitar a importação:</p>
+              <button @click="downloadExcelTemplate" class="template-btn">
+                📥 Baixar Modelo Excel
               </button>
             </div>
           </div>
           
           <div class="file-upload-section">
-            <label for="csvFile" class="file-label">Selecionar arquivo CSV:</label>
-            <input type="file" @change="handleFileSelect" accept=".csv" ref="fileInput" id="csvFile" class="file-input" />
+            <label for="excelFile" class="file-label">Selecionar arquivo Excel:</label>
+            <input type="file" @change="handleFileSelect" accept=".xlsx" ref="fileInput" id="excelFile" class="file-input" />
           </div>
         </div>
         <div class="modal-actions">
           <button @click="showImportModal = false" class="cancel-btn">Cancelar</button>
           <button @click="importData" :disabled="!selectedFile || importing" class="import-btn">
-            {{ importing ? 'Importando CSV...' : 'Importar CSV' }}
+            {{ importing ? 'Importando Excel...' : 'Importar Excel' }}
           </button>
         </div>
       </div>
@@ -308,6 +308,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import * as XLSX from 'xlsx'
 
 const guests = ref<any[]>([])
 const groupedGuests = ref<any[]>([])
@@ -409,21 +410,21 @@ async function exportData() {
   try {
     loading.value = true
     
-    // Fetch CSV content directly
+    // Fetch Excel content directly
     const response = await fetch('/api/export-guests')
     
     if (!response.ok) {
       throw new Error('Export failed')
     }
     
-    // Get CSV content as blob
+    // Get Excel content as blob
     const blob = await response.blob()
     
     // Create download link
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `convidados-${new Date().toISOString().split('T')[0]}.csv`
+    link.download = `convidados-${new Date().toISOString().split('T')[0]}.xlsx`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -553,30 +554,72 @@ const updateInviteCodePreview = () => {
   }
 }
 
-// Function to download CSV template
-const downloadCSVTemplate = () => {
-  // Create sample CSV data with headers and example rows
-  const csvContent = [
-    // Headers
-    'name,category,referenceCode,email,kidAge,maleKid,dietary,notes',
-    // Example rows
-    'João Silva,Familia,Família Silva,joao@email.com,5,true,Sem lactose,Pai da aniversariante',
-    'Maria Silva,Familia,Família Silva,maria@email.com,,,Vegetariana,Mãe da aniversariante',
-    'Pedro Santos,Amigos,Família Santos,pedro@email.com,4,true,,Amigo da escola',
-    'Ana Costa,Creche,Professoras Creche,ana@creche.com,,,,"Professora da turma"',
-    'Carlos Oliveira,Padrinhos,Padrinhos,carlos@email.com,,,,"Padrinho da Maria Luiza"'
-  ].join('\n')
-  
-  // Create blob and download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
+// Function to download Excel template
+const downloadExcelTemplate = () => {
+  const sampleData = [
+    {
+      name: 'João Silva',
+      category: 'Familia',
+      referenceCode: 'Família Silva',
+      email: 'joao@email.com',
+      kidAge: 5,
+      maleKid: true,
+      dietary: 'Sem lactose',
+      notes: 'Pai da aniversariante'
+    },
+    {
+      name: 'Maria Silva',
+      category: 'Familia',
+      referenceCode: 'Família Silva',
+      email: 'maria@email.com',
+      dietary: 'Vegetariana',
+      notes: 'Mãe da aniversariante'
+    },
+    {
+      name: 'Pedro Santos',
+      category: 'Amigos',
+      referenceCode: 'Família Santos',
+      email: 'pedro@email.com',
+      kidAge: 4,
+      maleKid: true,
+      notes: 'Amigo da escola'
+    },
+    {
+      name: 'Ana Costa',
+      category: 'Creche',
+      referenceCode: 'Professoras Creche',
+      email: 'ana@creche.com',
+      notes: 'Professora da turma'
+    },
+    {
+      name: 'Carlos Oliveira',
+      category: 'Padrinhos',
+      referenceCode: 'Padrinhos',
+      email: 'carlos@email.com',
+      notes: 'Padrinho da Maria Luiza'
+    }
+  ]
+
+  const wb = XLSX.utils.book_new()
+  const ws = XLSX.utils.json_to_sheet(sampleData)
+  XLSX.utils.book_append_sheet(wb, ws, 'Guests')
+  const buffer = XLSX.write(wb, {
+    bookType: 'xlsx',
+    type: 'array',
+    codepage: 28591
+  })
+
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  })
   const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', 'modelo-convidados.csv')
-  link.style.visibility = 'hidden'
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'modelo-convidados.xlsx'
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 onMounted(() => {
@@ -1083,23 +1126,23 @@ useHead({
   border: 1px solid #64748B20;
 }
 
-.csv-columns {
+.excel-columns {
   list-style: none;
   padding: 0;
   margin: 1rem 0;
 }
 
-.csv-columns li {
+.excel-columns li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #64748B20;
   font-size: 0.9rem;
 }
 
-.csv-columns li:last-child {
+.excel-columns li:last-child {
   border-bottom: none;
 }
 
-.csv-columns code {
+.excel-columns code {
   background: #3B82F620;
   color: #3B82F6;
   padding: 0.2rem 0.4rem;
