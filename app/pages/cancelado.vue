@@ -103,9 +103,9 @@
 
     </div>
 
-    <!-- Creator Reference -->
-    <div class="creator-reference mt-4xl animate-fadeInUp stagger-5">
-      <p>Desenvolvido com ❤️ por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
+    <!-- Creator Reference Component -->
+    <div class="mt-4xl animate-fadeInUp stagger-5">
+      <CreatorReference containerClass="on-colored-bg" />
     </div>
   </div>
 </template>
@@ -511,48 +511,6 @@ definePageMeta({
     opacity: 0.8;
     transform: scale(1.1);
   }
-}
-
-/* Creator Reference Footer */
-.creator-reference {
-  padding: var(--space-xl) 0 var(--space-md) 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  text-align: center;
-  opacity: 0.9;
-}
-
-[data-theme="dark"] .creator-reference {
-  border-top: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.creator-reference p {
-  font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-}
-
-[data-theme="dark"] .creator-reference p {
-  color: rgba(148, 163, 184, 0.8);
-}
-
-.creator-reference a {
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-weight: 600;
-  transition: var(--transition-base);
-}
-
-[data-theme="dark"] .creator-reference a {
-  color: rgba(148, 163, 184, 0.9);
-}
-
-.creator-reference a:hover {
-  color: #ffffff;
-  text-decoration: underline;
-}
-
-[data-theme="dark"] .creator-reference a:hover {
-  color: #f8fafc;
 }
 
 /* Mobile Responsiveness */

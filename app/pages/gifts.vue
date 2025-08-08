@@ -41,9 +41,7 @@
       </section>
 
       <!-- Footer / Reference -->
-      <footer class="creator-reference mt-4xl animate-fadeInUp stagger-6">
-        <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
-      </footer>
+      <CreatorReference containerClass="on-glass-bg" />
     </div>
   </div>
 </template>
@@ -284,14 +282,4 @@ useSeoMeta({
 
 .actions { display: flex; flex-wrap: wrap; gap: var(--space-lg); justify-content: center; }
 .single-return-btn { justify-content: center; text-align: center; padding-left: var(--space-3xl); padding-right: var(--space-3xl); }
-
-.creator-reference {
-  margin-top: var(--space-4xl);
-  text-align: center;
-  font-size: var(--font-size-xs);
-  color: rgba(255,255,255,0.7);
-}
-
-.creator-reference a { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: var(--font-weight-semibold); }
-.creator-reference a:hover { color: var(--color-white); text-decoration: underline; }
 </style>

@@ -114,9 +114,7 @@
     />
 
     <!-- Creator Reference -->
-    <div class="creator-reference mt-4xl animate-fadeInUp stagger-6">
-      <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
-    </div>
+    <CreatorReference />
   </div>
 </template>
 
