@@ -386,9 +386,9 @@ definePageMeta({
         if (res.success && res.guests.length > 0) {
           const statuses = res.guests.map((guest: any) => guest.status)
           
-          // If all guests are CANCELLED, redirect to main page
+          // If all guests are CANCELLED, redirect to cancellation page
           if (statuses.every((s: string) => s === 'CANCELLED')) {
-            return navigateTo(`/${inviteCode}`, { replace: true })
+            return navigateTo('/cancelado', { replace: true })
           }
           
           // If guests are still PENDING, redirect to invitation page
