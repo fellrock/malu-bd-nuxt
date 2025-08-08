@@ -21,11 +21,11 @@
 
     <!-- Error State -->
     <div v-else-if="error" class="error-state glass-card animate-fadeInUp">
-      <Icon name="exclamation-triangle" size="48" class="error-icon mb-lg" />
+      <ExclamationTriangleIcon class="w-12 h-12 error-icon mb-lg" />
       <h3 class="mb-md">Ops! Algo deu errado</h3>
       <p class="mb-lg">{{ error }}</p>
       <button @click="fetchEventData" class="btn-primary">
-        <Icon name="arrow-path" size="16" />
+        <ArrowPathIcon class="w-4 h-4" />
         Tentar novamente
       </button>
     </div>
@@ -35,10 +35,14 @@
       
       <!-- Countdown Card -->
       <div class="countdown-card glass-card animate-fadeInScale stagger-1">
-        <h2 class="card-title">
-          <Icon name="clock" size="20" />
-          Contagem Regressiva
-        </h2>
+        <div class="card-header">
+          <div class="icon-action-btn static">
+            <ClockIcon class="action-icon" />
+          </div>
+          <h2 class="card-title">
+            Contagem Regressiva
+          </h2>
+        </div>
         <div class="countdown-display">
           <div class="countdown-time">{{ timeLeft }}</div>
           <p class="countdown-label">Para a festa da Maria Luiza!</p>
@@ -48,51 +52,73 @@
       <!-- Guest List Card -->
       <div class="guest-card glass-card animate-fadeInScale stagger-2">
         <div class="card-header">
+          <button
+            class="icon-action-btn"
+            :aria-expanded="showGuests ? 'true' : 'false'"
+            @click="showGuests = !showGuests"
+            :title="showGuests ? 'Esconder convidados' : 'Ver quem vem à festa!'"
+            :aria-label="showGuests ? 'Esconder lista de convidados' : 'Mostrar lista de convidados'"
+          >
+            <UserGroupIcon v-if="!showGuests" class="action-icon animate-bounce" aria-hidden="true" />
+            <EyeSlashIcon v-else class="action-icon" aria-hidden="true" />
+          </button>
           <h2 class="card-title">
-            <Icon name="users" size="20" />
             <span class="mobile-title">Confirmados</span>
             <span class="desktop-title">Convidados Confirmados</span>
           </h2>
         </div>
 
         <div v-if="guests.length === 0" class="empty-state">
-          <Icon name="user-group" size="48" class="empty-icon" />
+          <UserGroupIcon class="w-18 h-18 empty-icon" />
           <p>Nenhum convidado encontrado.</p>
         </div>
 
-        <div v-else class="guests-list">
-          <div v-for="guest in guests" :key="guest.id" class="guest-item">
-            <div class="guest-info">
-              <h3 class="guest-name">{{ guest.name }}</h3>
-              <div class="guest-details">
-                <p v-if="guest.email"><strong>Email:</strong> {{ guest.email }}</p>
-                <p v-if="guest.kidAge"><strong>Criança:</strong> {{ guest.kidAge }} anos ({{ guest.maleKid ? 'Menino' : 'Menina' }})</p>
-                <p v-if="guest.dietary"><strong>Restrições:</strong> {{ guest.dietary }}</p>
+        <div v-show="showGuests">
+          <div v-if="guests.length > 0" class="guests-list">
+            <div v-for="guest in guests" :key="guest.id" class="guest-item">
+              <div class="guest-info">
+                <h3 class="guest-name">{{ guest.name }}</h3>
+                <div class="guest-details">
+                  <p v-if="guest.email"><strong>Email:</strong> {{ guest.email }}</p>
+                  <p v-if="guest.kidAge"><strong>Criança:</strong> {{ guest.kidAge }} anos ({{ guest.maleKid ? 'Menino' : 'Menina' }})</p>
+                  <p v-if="guest.dietary"><strong>Restrições:</strong> {{ guest.dietary }}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Family Actions -->
-        <div v-if="guests.length > 0" class="family-actions">
-          <button @click="showEditAllModal = true" class="family-action-btn edit-btn">
-            <Icon name="pencil-square" size="20" />
-            Editar
-          </button>          
-          <button @click="showCancelAllModal = true" class="family-action-btn cancel-btn">
-            <Icon name="x-mark" size="20" />
-            Desistência
-          </button>
+          <!-- Family Actions -->
+          <div v-if="guests.length > 0" class="family-actions">
+            <button @click="showEditAllModal = true" class="family-action-btn edit-btn" title="Editar">
+              <PencilSquareIcon class="action-icon" />
+              <span class="btn-text">Editar</span>
+            </button>
+            <button @click="showCancelAllModal = true" class="family-action-btn cancel-btn" title="Desistência">
+              <XMarkIcon class="action-icon" />
+              <span class="btn-text">Desistência</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Event Timeline -->
       <div class="timeline-card glass-card animate-fadeInScale stagger-3">
-        <h2 class="card-title timeline-title">
-          <Icon name="calendar-days" size="20" />
-          Cronograma do Evento
-        </h2>
-        <div class="timeline">
+        <div class="card-header">
+          <button
+            class="icon-action-btn"
+            :aria-expanded="showTimeline ? 'true' : 'false'"
+            @click="showTimeline = !showTimeline"
+            :title="showTimeline ? 'Esconder horários' : 'Ver programação da festa!'"
+            :aria-label="showTimeline ? 'Esconder cronograma' : 'Mostrar cronograma'"
+          >
+            <ClockIcon v-if="!showTimeline" class="action-icon animate-pulse" aria-hidden="true" />
+            <CheckCircleIcon v-else class="action-icon text-green-500" aria-hidden="true" />
+          </button>
+          <h2 class="card-title">
+            Cronograma do Evento
+          </h2>
+        </div>
+        <div class="timeline" v-show="showTimeline">
           <div class="timeline-item">
             <div class="timeline-time">10h00</div>
             <div class="timeline-content">
@@ -108,28 +134,14 @@
             </div>
           </div>
           <div class="timeline-item">
-            <div class="timeline-time">11h30</div>
+            <div class="timeline-time">13h00</div>
             <div class="timeline-content">
               <strong>🎂 Parabéns</strong><br>
               Cantamos parabéns e cortamos o bolo
             </div>
           </div>
           <div class="timeline-item">
-            <div class="timeline-time">12h00</div>
-            <div class="timeline-content">
-              <strong>🍽️ Almoço</strong><br>
-              Servimos o almoço para todos
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-time">13h00</div>
-            <div class="timeline-content">
-              <strong>📸 Fotos</strong><br>
-              Sessão de fotos com a aniversariante
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-time">14h00</div>
+            <div class="timeline-time">13h45</div>
             <div class="timeline-content">
               <strong>🎁 Encerramento</strong><br>
               Despedida e lembrancinhas
@@ -142,12 +154,17 @@
       <div class="info-cards">
         <!-- Location Card -->
         <div class="location-card glass-card animate-fadeInScale stagger-4">
-          <h3 class="info-title">
-            <Icon name="map-pin" size="20" />
-            Local
-          </h3>
+          <div class="card-header">
+            <div class="icon-action-btn static">
+              <MapPinIcon class="action-icon" />
+            </div>
+            <h3 class="info-title">
+              Local
+            </h3>
+          </div>
           <div class="location-content">
             <div class="location-logo">
+
               <a 
                 href="https://www.instagram.com/oquintal_oficial/" 
                 target="_blank" 
@@ -157,7 +174,7 @@
               >
                 <img src="/oquintal_logo.jpg" alt="O Quintal Oficial" class="quintal-logo" />
                 <div class="instagram-overlay">
-                  <Icon name="camera" size="20" />
+                  <CameraIcon class="micro-icon" />
                 </div>
               </a>
             </div>
@@ -166,7 +183,7 @@
               <p class="address">Av. Genaro de Carvalho 3555, Recreio dos Bandeirantes - Rio de Janeiro, RJ</p>
               
               <div class="parking-info">
-                <Icon name="truck" size="16" class="parking-icon" />
+                <Squares2X2Icon class="small-icon parking-icon" />
                 <span>
                   Estacionamento livre nas ruas adjacentes a casa de festa
                 </span>
@@ -192,9 +209,9 @@
                   rel="noopener noreferrer"
                   class="directions-link"
                 >
-                  <Icon name="map-pin" size="16" class="directions-icon" />
+                  <MapPinIcon class="micro-icon directions-icon" />
                   <span>Ver direções no Google Maps</span>
-                  <Icon name="arrow-top-right-on-square" size="16" class="external-icon" />
+                  <ArrowTopRightOnSquareIcon class="micro-icon external-icon" />
                 </a>
               </div>
             </div>
@@ -203,30 +220,66 @@
 
         <!-- Dress Code Card -->
         <div class="dress-card glass-card animate-fadeInScale stagger-5">
-          <h3 class="info-title">
-            <Icon name="sparkles" size="20" />
-            Traje
-          </h3>
+          <div class="card-header">
+            <div class="icon-action-btn static">
+              <SparklesIcon class="action-icon" />
+            </div>
+            <h3 class="info-title">
+              Traje
+            </h3>
+          </div>
           <p class="info-content">
             Casual e Colorido!<br>
-            Vista-se com cores alegres para celebrar com a Maria Luiza.
+            Vista-se com cores alegres para celebrar com a Maria Luiza.<br>
+            Aviso: teremos brincadeiras com água para as crianças 💦. Traga uma troca de roupa que possa molhar.
           </p>
         </div>
 
         <!-- Gifts Card -->
         <div class="gifts-card glass-card animate-fadeInScale stagger-6">
-          <h3 class="info-title">
-            <Icon name="gift" size="20" />
-            Presentes
-          </h3>
+          <div class="card-header">
+            <button @click="goToGifts" class="icon-action-btn clickable-link" title="Clique para ver lista de presentes">
+              <GiftIcon class="action-icon" />
+              <div class="link-indicator">
+                <ArrowTopRightOnSquareIcon class="link-icon" />
+              </div>
+            </button>
+            <h3 class="info-title">
+              Presentes
+            </h3>
+          </div>
           <p class="info-content">
             Sua presença já é o melhor presente!<br>
-            Mas se quiser saber nossas sugestões...
+            Mas se quiser saber nossas sugestões...<br>
+            <small class="click-hint">👆 Clique no ícone para ver a lista</small>
           </p>
-          <button @click="goToGifts" class="gifts-btn">
-            <Icon name="gift" size="16" />
-            Ver Sugestões
-          </button>
+        </div>
+
+        <!-- Photos Card -->
+        <div class="photos-card glass-card animate-fadeInScale stagger-7">
+          <div class="card-header">
+            <a
+              href="https://photos.app.goo.gl/EGZrsz1TRUt7CrKFA"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="icon-action-btn clickable-link"
+              title="Clique para abrir álbum colaborativo de fotos"
+            >
+              <CameraIcon class="action-icon" />
+              <div class="link-indicator">
+                <ArrowTopRightOnSquareIcon class="link-icon" />
+              </div>
+            </a>
+            <h3 class="info-title">
+              Álbum de Fotos
+            </h3>
+          </div>
+          <p class="info-content">
+            Vamos construir juntos as memórias desse dia? 📸<br>
+            Abra o <strong>álbum colaborativo</strong> e envie suas fotos em tempo real. Cada clique seu é um carinho para a MaLu e nossa família. 💖<br>
+            <small class="click-hint">👆 Clique no ícone para acessar o álbum</small>
+          </p>
+          <p class="privacy-hint">Dica: você pode enviar fotos direto do celular durante a festa. 🎈</p>
         </div>
       </div>
     </div>
@@ -289,12 +342,39 @@
         </div>
       </div>
     </div>
+
+    <!-- Creator Reference -->
+    <div class="creator-reference mt-4xl animate-fadeInUp stagger-6">
+      <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ThemeToggle from '~/components/ThemeToggle.vue'
+import {
+  ClockIcon,
+  UserGroupIcon,
+  CalendarDaysIcon,
+  MapPinIcon,
+  GiftIcon,
+  PhotoIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
+  EyeSlashIcon,
+  CheckCircleIcon,
+  UsersIcon,
+  CalendarIcon,
+  PencilSquareIcon,
+  XMarkIcon,
+  CameraIcon,
+  ArrowTopRightOnSquareIcon,
+  SparklesIcon,
+  Squares2X2Icon
+} from '@heroicons/vue/24/solid'
 
 // Page meta for middleware - STRICT: Only CONFIRMED guests allowed
 definePageMeta({
@@ -351,6 +431,9 @@ const timeLeft = ref('')
 
 const referenceInfo = ref<any>(null)
 const guests = ref<any[]>([])
+// UI toggles
+const showGuests = ref(false)
+const showTimeline = ref(false)
 
 // Edit modal state
 const showEditAllModal = ref(false)
@@ -642,27 +725,44 @@ useSeoMeta({
   max-width: 1200px;
   margin: 0 auto;
   grid-template-columns: 1fr;
+  grid-template-areas:
+    "countdown"
+    "guests"
+    "timeline"
+    "info";
+  align-items: start;
 }
 
-@media (min-width: 768px) {
+/* Desktop / Large layout with explicit areas to prevent overlap & maintain order */
+@media (min-width: 1024px) {
   .event-content {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "countdown guests"
+      "timeline guests"
+      "info info";
   }
 }
+
+/* Assign grid areas */
+.countdown-card { grid-area: countdown; }
+.guest-card { grid-area: guests; }
+.timeline-card { grid-area: timeline; }
+.info-cards { grid-area: info; }
 
 /* Glass Cards */
 .glass-card {
   background: var(--color-surface-elevated);
   border: var(--border-glass);
   border-radius: var(--radius-xl);
-  padding: var(--space-2xl);
+  padding: var(--space-xl);
   transition: var(--transition-base);
   backdrop-filter: var(--glass-backdrop);
   box-shadow: var(--shadow-lg);
 }
 
 .glass-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-xl);
   border-color: rgba(255, 105, 180, 0.4);
 }
@@ -670,11 +770,9 @@ useSeoMeta({
 /* Card Headers */
 .card-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-xl);
-  flex-wrap: wrap;
-  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  gap: var(--space-sm);
 }
 
 .card-title {
@@ -682,9 +780,175 @@ useSeoMeta({
   font-weight: 700;
   color: var(--color-text-primary);
   margin: 0;
+  flex: 1;
+}
+
+.info-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+/* Icon Action Buttons - Minimal, elegant icons on the left */
+.icon-action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 105, 180, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs);
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.1);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.icon-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 105, 180, 0.4);
+  box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.icon-action-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.3);
+}
+
+.icon-action-btn.static {
+  cursor: default;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 105, 180, 0.1);
+}
+
+.icon-action-btn.static:hover {
+  transform: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 105, 180, 0.1);
+  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.1);
+}
+
+/* Clickable link styling with enhanced visual cues */
+.icon-action-btn.clickable-link {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(147, 112, 219, 0.15));
+  border: 2px solid rgba(255, 105, 180, 0.3);
+  box-shadow: 0 3px 10px rgba(255, 105, 180, 0.2);
+}
+
+.icon-action-btn.clickable-link:hover {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.25), rgba(147, 112, 219, 0.25));
+  border-color: rgba(255, 105, 180, 0.5);
+  box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.icon-action-btn.clickable-link:hover .action-icon {
+  animation: gentle-bounce 0.6s ease-in-out;
+}
+
+/* Link indicator overlay */
+.link-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: rgba(255, 105, 180, 0.9);
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  transform: scale(0.8);
+}
+
+.icon-action-btn.clickable-link:hover .link-indicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.link-icon {
+  width: 8px;
+  height: 8px;
+  color: white;
+}
+
+/* Click hint text styling */
+.click-hint {
+  color: var(--color-primary);
+  font-weight: 600;
+  display: block;
+  margin-top: var(--space-sm);
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.action-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-text-primary);
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Micro icons for inline content - much smaller and subtle */
+.micro-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Small icons for better visibility in content */
+.small-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* Special styling for themed action icons */
+.icon-action-btn .action-icon.animate-bounce {
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
+
+.icon-action-btn .action-icon.animate-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+.icon-action-btn .action-icon.text-green-500 {
+  color: #10b981;
+}
+
+@keyframes gentle-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-2px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
 }
 
 /* Responsive Titles */
@@ -738,11 +1002,11 @@ useSeoMeta({
 /* Countdown */
 .countdown-display {
   text-align: center;
-  margin-top: var(--space-lg);
+  margin-top: var(--space-md);
 }
 
 .countdown-time {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.25rem, 3vw, 2rem);
   font-weight: 800;
   color: white;
   text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
@@ -750,8 +1014,8 @@ useSeoMeta({
 
 .countdown-label {
   color: var(--color-text-secondary);
-  margin-top: var(--space-sm);
-  font-size: var(--text-lg);
+  margin-top: var(--space-xs);
+  font-size: var(--text-md);
 }
 
 /* Guest List */
@@ -845,9 +1109,10 @@ useSeoMeta({
 
 .family-action-btn {
   flex: 1;
-  max-width: 150px;
-  padding: var(--space-md) var(--space-lg);
-  min-height: 44px;
+  max-width: 120px;
+  padding: var(--space-sm) var(--space-md);
+  min-height: 36px;
+  font-size: var(--text-sm);
 }
 
 .edit-btn,
@@ -893,10 +1158,6 @@ useSeoMeta({
 }
 
 /* Timeline */
-.timeline-title {
-  margin-bottom: var(--space-2xl) !important;
-}
-
 .timeline {
   display: flex;
   flex-direction: column;
@@ -939,18 +1200,29 @@ useSeoMeta({
 
 @media (min-width: 640px) {
   .info-cards {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr; /* keep single column base */
   }
+}
+
+/* Desktop: compact card heights and multi-column except location */
+@media (min-width: 1024px) {
+  .glass-card { padding: var(--space-lg); }
+  .dress-card, .gifts-card, .photos-card { min-height: auto; }
+  .info-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* Make location card full row and image on top */
+  .location-card { grid-column: 1 / -1; }
+  .location-content { flex-direction: column; align-items: center; }
+  .location-details { text-align: center; }
 }
 
 .info-title {
   font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-md) 0;
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
+  margin: 0;
+  flex: 1;
 }
 
 .info-content {
@@ -1125,22 +1397,22 @@ useSeoMeta({
 
 @media (min-width: 480px) {
   .location-content {
-    flex-direction: row;
-    align-items: flex-start;
-    text-align: left;
+  flex-direction: column; /* keep image on top */
+  align-items: center;
+  text-align: center;
   }
   
   .location-details {
-    text-align: left;
-    flex: 1;
+  text-align: center;
+  flex: unset;
   }
   
   .parking-info {
-    justify-content: flex-start;
+  justify-content: center;
   }
   
   .location-actions {
-    justify-content: flex-start;
+  justify-content: center;
   }
 }
 
@@ -1150,10 +1422,10 @@ useSeoMeta({
   border: 1px solid rgba(252, 123, 3, 0.4);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
-  font-weight: 200;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition-base);
-  font-size: var(--text-ss);
+  font-size: var(--text-sm);
   margin-top: var(--space-md);
   display: inline-flex;
   align-items: center;
@@ -1163,6 +1435,84 @@ useSeoMeta({
 .gifts-btn:hover {
   box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
   transform: translateY(-1px);
+}
+
+/* Photos Card */
+.photos-card {
+  position: relative;
+}
+
+.photos-btn {
+  background: linear-gradient(135deg, rgba(147,112,219,1), rgba(186,148,255,1));
+  color: var(--color-text-primary);
+  border: 1px solid rgba(147,112,219,0.5);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+  font-size: var(--text-sm);
+  margin-top: var(--space-md);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+  box-shadow: 0 4px 18px rgba(147,112,219,0.35);
+}
+
+.photos-btn:hover {
+  box-shadow: 0 6px 22px rgba(147,112,219,0.55);
+  transform: translateY(-2px);
+  border-color: rgba(186,148,255,0.8);
+}
+
+.privacy-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-sm);
+  opacity: 0.85;
+}
+
+/* Icon-oriented buttons: keep icon visible, allow text truncation/hide on tight */
+.btn-text { white-space: nowrap; }
+@media (max-width: 360px) {
+  .btn-text { display: none; }
+}
+
+/* Toggle button for collapsible sections */
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.15);
+  cursor: pointer;
+  transition: var(--transition-base);
+  backdrop-filter: blur(4px);
+}
+.toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background: rgba(255,255,255,0.25);
+}
+.toggle-icon {
+  color: #ffffff !important;
+  transition: transform 200ms ease;
+  font-size: 18px !important;
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+.toggle-icon.rotated { transform: rotate(180deg); }
+
+/* Icon-oriented button base */
+.icon-btn {
+  gap: var(--space-xs);
+  line-height: 1;
 }
 
 /* Empty State */
@@ -1343,5 +1693,31 @@ useSeoMeta({
 
 [data-theme="dark"] .btn-primary {
   color: #1A237E;
+}
+
+/* Creator Reference Footer */
+.creator-reference {
+  padding: var(--space-xl) 0 var(--space-md) 0;
+  border-top: var(--border-subtle, 1px solid rgba(255,255,255,0.15));
+  text-align: center;
+  opacity: 0.85;
+}
+
+.creator-reference p {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary, rgba(255,255,255,0.7));
+  margin: 0;
+}
+
+.creator-reference a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition-base);
+}
+
+.creator-reference a:hover {
+  color: var(--color-primary-light);
+  text-decoration: underline;
 }
 </style>

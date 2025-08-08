@@ -1,389 +1,297 @@
 <template>
-  <div class="container">
-    <div class="content">
+  <div class="gifts-container">
+    <div class="gifts-content">
       <!-- Header -->
-      <div class="header">
-        <h1 class="title">
-          Sugestões de Presentes para Maria Luiza
+      <header class="gifts-header animate-fadeInUp">
+        <h1 class="gifts-title">
+          <span class="mobile-title">Sugestões de Presentes 🎁</span>
+          <span class="desktop-title">Sugestões de Presentes para Maria Luiza 🎁</span>
         </h1>
-        <div class="emoji-decoration">🎁 💝 🎁</div>
-      </div>
+        <p class="gifts-subtitle">Lembre-se: sua presença é o presente mais valioso! ✨</p>
+      </header>
 
-      <!-- Main Message -->
-      <div class="intro-card">
+      <!-- Intro / Message -->
+      <section class="glass-card intro-section animate-fadeInScale">
         <p class="intro-text">
-          Maria Luiza está muito animada para comemorar com todos os amigos e familiares queridos. 
-          <span class="emphasis">Sua presença na festa é o presente mais valioso</span> que ela pode receber.
+          Maria Luiza está muito animada para comemorar com todos os amigos e familiares queridos.
+          <strong class="highlight"> Sua presença na festa é o presente mais valioso</strong> que ela pode receber.
+          <br />Ainda assim, deixamos algumas ideias caso deseje levar algo com carinho.
         </p>
-      </div>
+      </section>
 
-      <!-- Optional Gifts Section -->
-      <div class="categories-grid">
-        <div class="category-card">
-          <div class="category-icon">📚</div>
-          <h4 class="category-title">Livros Infantis</h4>
-          <ul class="category-list">
-            <li class="category-item">Livros de histórias</li>
-            <li class="category-item">Contos de fada</li>
-            <li class="category-item">Livros educativos</li>
-          </ul>
+      <!-- Categories -->
+      <section class="categories-grid animate-fadeInUp">
+        <div class="gift-category glass-card" v-for="category in giftCategories" :key="category.title">
+          <div class="category-icon" aria-hidden="true">{{ category.icon }}</div>
+            <h3 class="category-title">{{ category.title }}</h3>
+            <ul class="category-items">
+              <li v-for="item in category.items" :key="item" class="category-item">{{ item }}</li>
+            </ul>
         </div>
+      </section>
 
-        <div class="category-card">
-          <div class="category-icon">🧸</div>
-          <h4 class="category-title">Brinquedos</h4>
-          <ul class="category-list">
-            <li class="category-item">Quebra-cabeças</li>
-            <li class="category-item">Jogos educativos</li>
-            <li class="category-item">Bonecas e bichinhos</li>
-          </ul>
-        </div>
-
-        <div class="category-card">
-          <div class="category-icon">🎨</div>
-          <h4 class="category-title">Material de Arte</h4>
-          <ul class="category-list">
-            <li class="category-item">Lápis de cor</li>
-            <li class="category-item">Tintas e pincéis</li>
-            <li class="category-item">Cadernos de desenho</li>
-          </ul>
-        </div>
-
-        <div class="category-card">
-          <div class="category-icon">👗</div>
-          <h4 class="category-title">Roupas</h4>
-          <ul class="category-list">
-            <li class="category-item">Vestidos infantis (tam. 4)</li>
-            <li class="category-item">Conjuntinhos</li>
-            <li class="category-item">Acessórios para cabelo</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Closing Message -->
-      <div class="closing-card">
+      <!-- Closing Card -->
+      <section class="glass-card closing-section animate-fadeInScale">
         <p class="closing-text">
-          Lembre-se: o mais importante é celebrarmos juntos esse momento especial! 
-          <span class="heart-decoration">💕</span>
+          O mais importante é celebrarmos juntos esse momento especial! <span class="emoji">💕</span>
         </p>
-      </div>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm single-return-btn" @click="goToEvent">Voltar ao Evento</button>
+        </div>
+      </section>
 
-      <!-- Navigation -->
-      <div class="navigation">
-        <button @click="goToEvent" class="nav-button">
-          <span class="button-icon">�</span>
-          Voltar ao Evento
-        </button>
-      </div>
-      
-      <!-- Creator Reference -->
-      <div class="creator-reference">
+      <!-- Footer / Reference -->
+      <footer class="creator-reference mt-4xl animate-fadeInUp stagger-6">
         <p>Desenvolvido por <a href="https://www.kravela.cloud" target="_blank" rel="noopener noreferrer">Kravela Cloud LTDA</a></p>
-      </div>
+      </footer>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// Check for stored invitation code from previous successful page access
+import { ref, onMounted } from 'vue'
+
+// Gift categories (could be moved to a composable if reused elsewhere)
+const giftCategories = ref([
+  {
+    title: 'Livros Infantis',
+    icon: '📚',
+    items: ['Livros de histórias', 'Contos de fada', 'Livros educativos']
+  },
+  {
+    title: 'Brinquedos',
+    icon: '🧸',
+    items: ['Quebra-cabeças', 'Jogos educativos', 'Bonecas e bichinhos']
+  },
+  {
+    title: 'Material de Arte',
+    icon: '🎨',
+    items: ['Lápis de cor', 'Tintas e pincéis', 'Cadernos de desenho']
+  },
+  {
+    title: 'Roupas',
+    icon: '👗',
+    items: ['Vestidos infantis (tam. 4)', 'Conjuntinhos', 'Acessórios para cabelo']
+  }
+])
+
+// Access control (reuse invitation cookie like event page stores)
 onMounted(async () => {
   const invitationCookie = useCookie('invitationCode', {
     default: () => '',
-    maxAge: 60 * 60 * 24 * 7, // 1 week
+    maxAge: 60 * 60 * 24 * 7,
     sameSite: 'lax'
   })
-  
+
   if (!invitationCookie.value) {
-    // No stored invitation code, redirect to access denied
     await navigateTo('/acesso-negado', { replace: true })
     return
   }
-  
+
   try {
-    // Verify the stored invitation code is still valid and has confirmed guests
     const res: any = await $fetch(`/api/guest-code/${invitationCookie.value}`)
     if (!res.success || !res.guests.length) {
-      await navigateTo('/acesso-negado', { replace: true })
-      return
+      return navigateTo('/acesso-negado', { replace: true })
     }
-    
-    const hasConfirmedGuests = res.guests.some((guest: any) => guest.status === 'CONFIRMED')
-    if (!hasConfirmedGuests) {
-      await navigateTo('/acesso-negado', { replace: true })
-      return
+
+    const confirmed = res.guests.some((g: any) => g.status === 'CONFIRMED')
+    if (!confirmed) {
+      return navigateTo('/acesso-negado', { replace: true })
     }
-  } catch (err) {
-    console.error('Error verifying invitation code:', err)
-    await navigateTo('/acesso-negado', { replace: true })
-    return
+  } catch (e) {
+    console.error('Gift page access validation failed', e)
+    return navigateTo('/acesso-negado', { replace: true })
   }
 })
 
-// Navigation functions
 const goToEvent = () => {
   const invitationCookie = useCookie('invitationCode', {
     default: () => '',
-    maxAge: 60 * 60 * 24 * 7, // 1 week
+    maxAge: 60 * 60 * 24 * 7,
     sameSite: 'lax'
   })
-  
-  if (invitationCookie.value) {
-    navigateTo(`/evento/${invitationCookie.value}`)
-  } else {
-    navigateTo('/')
-  }
+  if (invitationCookie.value) navigateTo(`/evento/${invitationCookie.value}`)
+  else navigateTo('/')
 }
 
-const goHome = () => {
-  navigateTo('/')
-}
+const goHome = () => navigateTo('/')
 
-const goToRsvp = () => {
-  navigateTo('/rsvp')
-}
-
-// Page meta
-useHead({
+useSeoMeta({
   title: 'Presentes - Maria Luiza 4 Anos',
-  meta: [
-    { name: 'description', content: 'Informações sobre presentes para a festa de 4 anos da Maria Luiza' }
-  ]
+  description: 'Sugestões de presentes para a festa de 4 anos da Maria Luiza'
 })
 </script>
 
 <style scoped>
-.container {
+.gifts-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  padding: 2rem 1rem;
+  background: var(--gradient-background);
+  padding: var(--space-xl) var(--space-lg) var(--space-6xl);
+  box-sizing: border-box;
 }
 
-.content {
-  max-width: 800px;
+@media (min-width: 640px) {
+  .gifts-container {
+    padding: var(--space-2xl) var(--space-2xl) var(--space-7xl);
+  }
+}
+
+.gifts-content {
+  max-width: 960px;
   margin: 0 auto;
-  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xl);
 }
 
-.header {
+.gifts-header {
   text-align: center;
-  margin-bottom: 3rem;
 }
 
-.title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+.gifts-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: var(--font-weight-extrabold);
+  margin: 0;
+  line-height: 1.15;
+  background: linear-gradient(135deg, var(--color-white), var(--color-accent-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 4px 18px rgba(0,0,0,0.25);
 }
 
-.emoji-decoration {
-  font-size: 2rem;
-  margin: 1rem 0;
-  display: block;
+.gifts-subtitle {
+  margin: var(--space-md) 0 0 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-white);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
-.intro-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+/* Responsive titles */
+.mobile-title { display: block; }
+.desktop-title { display: none; }
+@media (min-width: 768px) {
+  .mobile-title { display: none; }
+  .desktop-title { display: inline; }
+}
+
+.intro-section {
   text-align: center;
+  padding: var(--space-3xl) var(--space-2xl);
 }
 
 .intro-text {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.3rem;
-  font-weight: 400;
-  line-height: 1.6;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   margin: 0;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-white);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
-.emphasis {
-  font-weight: 700;
-  color: #fff3cd;
-}
+.intro-text .highlight { color: var(--color-accent-light); font-weight: var(--font-weight-bold); }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-2xl);
 }
 
-.category-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+.gift-category {
+  position: relative;
+  padding: var(--space-2xl) var(--space-xl) var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  transition: var(--transition-base);
+  overflow: hidden;
 }
 
-.category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 35px 70px rgba(0, 0, 0, 0.15);
+.gift-category:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 15%, rgba(255,255,255,0.25), transparent 60%);
+  pointer-events: none;
 }
+
+.gift-category:hover { transform: translateY(-4px); box-shadow: var(--shadow-xl); }
 
 .category-icon {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
-  display: block;
   text-align: center;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.25));
 }
 
 .category-title {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: white;
-  margin: 0 0 1rem 0;
+  margin: 0;
   text-align: center;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
 }
 
-.category-list {
+.category-items {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .category-item {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1rem;
-  color: white;
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
   position: relative;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  padding-left: 1.25rem;
+  color: var(--color-white);
+  font-size: var(--font-size-base);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 .category-item:before {
-  content: '•';
-  color: #ff6b6b;
-  font-weight: bold;
+  content: '';
   position: absolute;
   left: 0;
-  font-size: 1.2rem;
+  top: 0.6em;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
 }
 
-.closing-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 2.5rem;
-  margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+.closing-section {
   text-align: center;
+  padding: var(--space-3xl) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xl);
 }
 
 .closing-text {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  font-size: 1.2rem;
-  font-weight: 400;
-  line-height: 1.6;
-  color: white;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  margin: 0 0 1.5rem 0;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-white);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.35);
 }
 
-.heart-decoration {
-  font-size: 1.5rem;
-}
+.closing-text .emoji { font-size: 1.6rem; }
 
-.navigation {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.nav-button {
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8));
-  color: #ff6b6b;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  padding: 1rem 2rem;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.nav-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-  background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.95));
-}
-
-.button-icon {
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem 0.5rem;
-  }
-  
-  .title {
-    font-size: 2rem;
-  }
-  
-  .categories-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .navigation {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .nav-button {
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
-  }
-}
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-lg); justify-content: center; }
+.single-return-btn { justify-content: center; text-align: center; padding-left: var(--space-3xl); padding-right: var(--space-3xl); }
 
 .creator-reference {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: var(--space-4xl);
   text-align: center;
+  font-size: var(--font-size-xs);
+  color: rgba(255,255,255,0.7);
 }
 
-.creator-reference p {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0;
-  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-}
-
-.creator-reference a {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.creator-reference a:hover {
-  color: #ffffff;
-  text-decoration: underline;
-  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
-}
+.creator-reference a { color: rgba(255,255,255,0.85); text-decoration: none; font-weight: var(--font-weight-semibold); }
+.creator-reference a:hover { color: var(--color-white); text-decoration: underline; }
 </style>
