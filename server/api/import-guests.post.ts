@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../utils/prisma'
+import * as XLSX from 'xlsx'
 
 // Validation schema for imported guest data
 const importedGuestSchema = z.object({
@@ -41,39 +42,22 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // Parse CSV file
+    // Parse Excel file
     let guestsData: any[] = []
-    
-    if (fileData.filename?.endsWith('.csv')) {
-      // Parse CSV
-      const csvText = fileData.data.toString('utf-8')
-      const lines = csvText.split('\n').filter(line => line.trim())
-      
-      if (lines.length < 2) {
-        throw createError({
-          statusCode: 400,
-          statusMessage: 'Arquivo CSV deve ter pelo menos um cabeçalho e uma linha de dados'
-        })
-      }
 
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
-      
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''))
-        const guest: any = {}
-        
-        headers.forEach((header, index) => {
-          if (values[index]) {
-            guest[header] = values[index]
-          }
-        })
-        
-        guestsData.push(guest)
-      }
+    if (fileData.filename?.endsWith('.xlsx')) {
+      const workbook = XLSX.read(fileData.data, {
+        type: 'buffer',
+        codepage: 28591
+      })
+      const sheetName = workbook.SheetNames[0]
+      const worksheet = workbook.Sheets[sheetName]
+      guestsData = XLSX.utils.sheet_to_json(worksheet, { defval: '' })
     } else {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Formato de arquivo não suportado. Apenas arquivos CSV são aceitos.'
+        statusMessage:
+          'Formato de arquivo não suportado. Apenas arquivos Excel são aceitos.'
       })
     }
 
