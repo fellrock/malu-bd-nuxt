@@ -3,14 +3,13 @@ import { prisma } from '../utils/prisma'
 
 const CreateGuestSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email().optional(),
+  email: z.string().email().optional().or(z.literal('')),
   category: z.enum(['Amigos', 'Creche', 'Familia', 'Padrinhos']),
   referenceCode: z.string().min(1),
-  inviteCode: z.string().optional(), // Optional since we'll generate it
   kidAge: z.number().optional(),
   maleKid: z.boolean().optional(),
-  dietary: z.string().optional(),
-  notes: z.string().optional(),
+  dietary: z.string().optional().or(z.literal('')),
+  notes: z.string().optional().or(z.literal('')),
   status: z.enum(['REGISTERED', 'CONFIRMED', 'ATTENDED']).default('REGISTERED')
 })
 
@@ -25,9 +24,11 @@ export default defineEventHandler(async (event) => {
 
   try {
     const body = await readBody(event)
+    console.log('Received body:', body)
     
     // Validate input
     const validatedData = CreateGuestSchema.parse(body)
+    console.log('Validated data:', validatedData)
     
     // Check if there's already a guest with the same referenceCode to reuse invite code
     const existingGuestWithSameRef = await prisma.guest.findFirst({
@@ -74,17 +75,19 @@ export default defineEventHandler(async (event) => {
     const guest = await prisma.guest.create({
       data: {
         name: validatedData.name,
-        email: validatedData.email || null,
+        email: validatedData.email && validatedData.email.trim() ? validatedData.email : null,
         category: validatedData.category,
         referenceCode: validatedData.referenceCode,
-        inviteCode: inviteCode, // Use the generated invite code
+        inviteCode: inviteCode,
         kidAge: validatedData.kidAge || null,
         maleKid: validatedData.maleKid || false,
-        dietary: validatedData.dietary || null,
-        notes: validatedData.notes || null,
+        dietary: validatedData.dietary && validatedData.dietary.trim() ? validatedData.dietary : null,
+        notes: validatedData.notes && validatedData.notes.trim() ? validatedData.notes : null,
         status: validatedData.status
       }
     })
+
+    console.log('Created guest:', guest)
 
     return {
       success: true,
